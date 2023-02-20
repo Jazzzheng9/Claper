@@ -3,6 +3,7 @@ defmodule ClaperWeb.EventLive.Manage do
 
   alias ClaperWeb.Presence
   alias Claper.Polls
+  alias Claper.Forms
 
   @impl true
   def mount(%{"code" => code}, session, socket) do
@@ -41,6 +42,7 @@ defmodule ClaperWeb.EventLive.Manage do
         |> assign(:state, event.presentation_file.presentation_state)
         |> assign(:posts, list_posts(socket, event.uuid))
         |> assign(:polls, list_polls(socket, event.presentation_file.id))
+        |> assign(:forms, list_forms(socket, event.presentation_file.id))
         |> assign(:create, nil)
         |> assign(:create_action, :new)
         |> push_event("page-manage", %{
@@ -140,6 +142,7 @@ defmodule ClaperWeb.EventLive.Manage do
   end
 
   def handle_event("poll-set-default", %{"id" => id}, socket) do
+    Forms.disable_all(socket.assigns.event.presentation_file.id, socket.assigns.state.position)
     Polls.set_default(
       id,
       socket.assigns.event.presentation_file.id,
@@ -154,9 +157,44 @@ defmodule ClaperWeb.EventLive.Manage do
       {:current_poll, poll}
     )
 
+    Phoenix.PubSub.broadcast(
+      Claper.PubSub,
+      "event:#{socket.assigns.event.uuid}",
+      {:current_form, nil}
+    )
+
     {:noreply,
      socket
-     |> assign(:polls, list_polls(socket, socket.assigns.event.presentation_file.id))}
+     |> assign(:polls, list_polls(socket, socket.assigns.event.presentation_file.id))
+     |> assign(:forms, list_forms(socket, socket.assigns.event.presentation_file.id))
+    }
+  end
+  def handle_event("form-set-default", %{"id" => id}, socket) do
+    Polls.disable_all(socket.assigns.event.presentation_file.id, socket.assigns.state.position)
+    Forms.set_default(
+      id,
+      socket.assigns.event.presentation_file.id,
+      socket.assigns.state.position
+    )
+
+    form = Forms.get_form!(id)
+
+    Phoenix.PubSub.broadcast(
+      Claper.PubSub,
+      "event:#{socket.assigns.event.uuid}",
+      {:current_form, form}
+    )
+
+    Phoenix.PubSub.broadcast(
+      Claper.PubSub,
+      "event:#{socket.assigns.event.uuid}",
+      {:current_poll, nil}
+    )
+
+    {:noreply,
+     socket
+     |> assign(:polls, list_polls(socket, socket.assigns.event.presentation_file.id))
+     |> assign(:forms, list_forms(socket, socket.assigns.event.presentation_file.id))}
   end
 
   @impl true
@@ -297,6 +335,21 @@ defmodule ClaperWeb.EventLive.Manage do
     |> assign(:poll, poll)
   end
 
+  defp apply_action(socket, :add_form, _params) do
+    socket
+    |> assign(:create, "form")
+    |> assign(:form, %Forms.Form{})
+  end
+
+  defp apply_action(socket, :edit_form, %{"id" => id}) do
+    form = Forms.get_form!(id)
+
+    socket
+    |> assign(:create, "form")
+    |> assign(:create_action, :edit)
+    |> assign(:form, form)
+  end
+
   defp poll_at_position(
          %{assigns: %{event: event, state: state}} = socket,
          broadcast \\ true
@@ -339,5 +392,9 @@ defmodule ClaperWeb.EventLive.Manage do
 
   defp list_polls(_socket, presentation_file_id) do
     Claper.Polls.list_polls(presentation_file_id)
+  end
+
+  defp list_forms(_socket, presentation_file_id) do
+    Claper.Forms.list_forms(presentation_file_id)
   end
 end
