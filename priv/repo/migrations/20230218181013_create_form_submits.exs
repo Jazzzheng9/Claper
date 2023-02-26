@@ -6,6 +6,7 @@ defmodule Claper.Repo.Migrations.CreateFormSubmits do
       add :attendee_identifier, :string
       add :form_id, references(:forms, on_delete: :delete_all)
       add :user_id, references(:users, on_delete: :delete_all)
+      add :response, :map, default: "[]"
 
       timestamps()
     end

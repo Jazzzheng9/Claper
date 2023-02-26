@@ -44,6 +44,7 @@ defmodule ClaperWeb.EventLive.Manage do
         |> assign(:polls, list_polls(socket, event.presentation_file.id))
         |> assign(:forms, list_forms(socket, event.presentation_file.id))
         |> assign(:create, nil)
+        |> assign(:list_tab, :posts)
         |> assign(:create_action, :new)
         |> push_event("page-manage", %{
           current_page: event.presentation_file.presentation_state.position,
@@ -51,7 +52,7 @@ defmodule ClaperWeb.EventLive.Manage do
         })
         |> poll_at_position(false)
 
-      {:ok, socket, temporary_assigns: [posts: []]}
+      {:ok, socket, temporary_assigns: [posts: [], form_submits: []]}
     end
   end
 
@@ -91,6 +92,22 @@ defmodule ClaperWeb.EventLive.Manage do
   @impl true
   def handle_info({:post_deleted, post}, socket) do
     {:noreply, socket |> update(:posts, fn posts -> [post | posts] end)}
+  end
+
+  @impl true
+  def handle_info({:form_submit_created, fs}, socket) do
+    {:noreply,
+     socket |> update(:form_submits, fn form_submits -> [fs | form_submits] end) |> push_event("scroll", %{})}
+  end
+
+  @impl true
+  def handle_info({:form_submit_updated, fs}, socket) do
+    {:noreply, socket |> update(:form_submits, fn form_submits -> [fs | form_submits] end)}
+  end
+
+  @impl true
+  def handle_info({:form_submit_deleted, fs}, socket) do
+    {:noreply, socket |> update(:form_submits, fn form_submits -> [fs | form_submits] end)}
   end
 
   @impl true
@@ -279,6 +296,24 @@ defmodule ClaperWeb.EventLive.Manage do
   end
 
   @impl true
+  def handle_event("delete-form-submit", %{"event-id" => event_id, "id" => id}, socket) do
+    form = Claper.Forms.get_form_submit_by_id!(id)
+    {:ok, _} = Claper.Forms.delete_form_submit(event_id, form)
+
+    {:noreply, assign(socket, :form_submits, list_form_submits(socket, socket.assigns.event.presentation_file.id))}
+  end
+
+  @impl true
+  def handle_event("list-tab", %{"tab" => tab}, socket) do
+    socket = assign(socket, :list_tab, String.to_atom(tab))
+    socket = case tab do
+      "posts" -> assign(socket, :posts, list_posts(socket, socket.assigns.event.uuid))
+      "forms" -> assign(socket, :form_submits, list_form_submits(socket, socket.assigns.event.presentation_file.id))
+    end
+    {:noreply,socket}
+  end
+
+  @impl true
   def handle_event("maybe-redirect", _params, socket) do
     if socket.assigns.create != nil do
       {:noreply,
@@ -338,7 +373,9 @@ defmodule ClaperWeb.EventLive.Manage do
   defp apply_action(socket, :add_form, _params) do
     socket
     |> assign(:create, "form")
-    |> assign(:form, %Forms.Form{})
+    |> assign(:form, %Forms.Form{
+      fields: [%Forms.Field{name: gettext("Name"), type: "text"}, %Forms.Field{name: gettext("Email"), type: "email"}]
+    })
   end
 
   defp apply_action(socket, :edit_form, %{"id" => id}) do
@@ -397,4 +434,9 @@ defmodule ClaperWeb.EventLive.Manage do
   defp list_forms(_socket, presentation_file_id) do
     Claper.Forms.list_forms(presentation_file_id)
   end
+
+  defp list_form_submits(_socket, presentation_file_id) do
+    Claper.Forms.list_form_submits(presentation_file_id)
+  end
+
 end

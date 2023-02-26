@@ -38,6 +38,24 @@ defmodule ClaperWeb.FormLive.FormComponent do
     save_form(socket, socket.assigns.live_action, form_params)
   end
 
+  @impl true
+  def handle_event("add_field", _params, %{assigns: %{changeset: changeset}} = socket) do
+    {:noreply, assign(socket, :changeset, changeset |> Forms.add_form_field())}
+  end
+
+  @impl true
+  def handle_event(
+        "remove_field",
+        %{"field" => field} = _params,
+        %{assigns: %{changeset: changeset}} = socket
+      ) do
+    {field, _} = Integer.parse(field)
+
+    form_field = Enum.at(Ecto.Changeset.get_field(changeset, :fields), field)
+
+    {:noreply, assign(socket, :changeset, changeset |> Forms.remove_form_field(form_field))}
+  end
+
   defp save_form(socket, :edit, form_params) do
     case Forms.update_form(
            socket.assigns.event_uuid,

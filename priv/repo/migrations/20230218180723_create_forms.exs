@@ -7,6 +7,7 @@ defmodule Claper.Repo.Migrations.CreateForms do
       add :position, :integer, default: 0
       add :enabled, :boolean, default: true
       add :presentation_file_id, references(:presentation_files, on_delete: :nothing)
+      add :fields, :map, default: "[]"
 
       timestamps()
     end
