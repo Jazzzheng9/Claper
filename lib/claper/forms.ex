@@ -212,6 +212,24 @@ defmodule Claper.Forms do
   end
 
   @doc """
+  Creates a form submit.
+
+  ## Examples
+
+      iex> create_form_submit(%{field: value})
+      {:ok, %FormSubmit{}}
+
+      iex> create_form_submit(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_form_submit(attrs \\ %{}) do
+    %FormSubmit{}
+    |> FormSubmit.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
   Returns the list of form submissions for a given presentation file.
 
   ## Examples

@@ -37,9 +37,10 @@ defmodule Claper.FormsFixtures do
       attrs
       |> Enum.into(%{
         form_id: assoc.form.id,
-        user_id: user_fixture().id
+        user_id: user_fixture().id,
+        response: %{"Test" => "some option 1", "Test2" => "some option 2"}
       })
-      |> Claper.Forms.create_or_update_form_submit(%{})
+      |> Claper.Forms.create_form_submit()
 
     form_submit
   end
