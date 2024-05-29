@@ -1,7 +1,7 @@
 defmodule ClaperWeb.Router do
   use ClaperWeb, :router
 
-  import ClaperWeb.{UserAuth, EventController}
+  import ClaperWeb.{UserAuth, EventController, LtiController}
 
   pipeline :browser do
     plug(:accepts, ["html"])
@@ -10,6 +10,14 @@ defmodule ClaperWeb.Router do
     plug(:put_root_layout, html: {ClaperWeb.LayoutView, :root})
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
+    plug(:fetch_current_user)
+    plug(ClaperWeb.Plugs.Locale)
+  end
+
+  pipeline :lti do
+    plug(:accepts, ["html", "json"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
     plug(:fetch_current_user)
     plug(ClaperWeb.Plugs.Locale)
   end
@@ -115,6 +123,16 @@ defmodule ClaperWeb.Router do
     post("/users/reset_password", UserResetPasswordController, :create)
     get("/users/reset_password/:token", UserResetPasswordController, :edit)
     post("/users/reset_password/:token", UserResetPasswordController, :update)
+  end
+
+  scope "/", ClaperWeb do
+    pipe_through([:lti])
+
+    get("/.well-known/jwks.json", LtiController, :jwks)
+    get("/lti/register", LtiController, :register)
+    post("/lti/login", LtiController, :login)
+    get("/lti/login", LtiController, :login)
+    post("/lti/launch", LtiController, :launch)
   end
 
   scope "/", ClaperWeb do
