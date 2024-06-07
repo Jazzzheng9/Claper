@@ -133,6 +133,7 @@ defmodule ClaperWeb.Router do
     post("/lti/login", LtiController, :login)
     get("/lti/login", LtiController, :login)
     post("/lti/launch", LtiController, :launch)
+    get("/lti/grades", LtiController, :grades)
   end
 
   scope "/", ClaperWeb do
