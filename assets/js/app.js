@@ -11,9 +11,11 @@ import airdatepickerLocaleEn from "air-datepicker/locale/en";
 import airdatepickerLocaleFr from "air-datepicker/locale/fr";
 import airdatepickerLocaleDe from "air-datepicker/locale/de";
 import airdatepickerLocaleEs from "air-datepicker/locale/es";
+import airdatepickerLocaleNl from "air-datepicker/locale/nl";
 import "moment/locale/de";
 import "moment/locale/fr";
 import "moment/locale/es";
+import "moment/locale/nl";
 import QRCodeStyling from "qr-code-styling";
 import { Presenter } from "./presenter";
 import { Manager } from "./manager";
@@ -21,7 +23,7 @@ import Split from "split-grid";
 import { TourGuideClient } from "@sjmc11/tourguidejs/src/Tour";
 window.moment = moment;
 
-const supportedLocales = ["en", "fr", "de", "es"];
+const supportedLocales = ["en", "fr", "de", "es", "nl"];
 
 var locale =
   document.querySelector("html").getAttribute("lang") ||
@@ -41,6 +43,7 @@ let airdatepickerLocale = {
   fr: airdatepickerLocaleFr,
   de: airdatepickerLocaleDe,
   es: airdatepickerLocaleEs,
+  nl: airdatepickerLocaleNl,
 };
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -83,10 +86,13 @@ Hooks.TourGuide = {
 Hooks.Split = {
   mounted() {
     const type = this.el.dataset.type;
+    const id = this.el.id;
     const gutter = this.el.dataset.gutter;
+    const forceLayout = this.el.classList.contains("grid-cols-[1fr]");
     const columnSlitValue =
-      localStorage.getItem("column-split") || "1fr 10px 1fr";
-    const rowSlitValue = localStorage.getItem("row-split") || "1fr 10px 1fr";
+      localStorage.getItem(`column-split-${id}`) || "1fr 10px 1fr";
+    const rowSlitValue =
+      localStorage.getItem(`row-split-${id}`) || "1fr 10px 1fr";
 
     if (type === "column") {
       this.columnSplit = Split({
@@ -98,10 +104,12 @@ Hooks.Split = {
         ],
         onDragEnd: () => {
           const currentPosition = this.el.style["grid-template-columns"];
-          localStorage.setItem("column-split", currentPosition);
+          localStorage.setItem(`column-split-${id}`, currentPosition);
         },
       });
-      this.el.style["grid-template-columns"] = columnSlitValue;
+      if (!forceLayout) {
+        this.el.style["grid-template-columns"] = columnSlitValue;
+      }
     } else {
       this.rowSplit = Split({
         rowGutters: [
@@ -112,21 +120,22 @@ Hooks.Split = {
         ],
         onDragEnd: () => {
           const value = this.el.style["grid-template-rows"];
-          localStorage.setItem("row-split", value);
+          localStorage.setItem(`row-split-${id}`, value);
         },
       });
-      this.el.style["grid-template-rows"] = rowSlitValue;
+      if (!forceLayout) {
+        this.el.style["grid-template-rows"] = rowSlitValue;
+      }
     }
   },
   updated() {
-    if (this.columnSplit) {
-      const value = localStorage.getItem("column-split") || "1fr 10px 1fr";
-      this.el.style["grid-template-columns"] = value;
+    const id = this.el.id;
+    const forceLayout = this.el.classList.contains("grid-cols-[1fr]");
+    if (forceLayout) {
+      return;
     }
-    if (this.rowSplit) {
-      const value = localStorage.getItem("row-split") || "1fr 10px 1fr";
-      this.el.style["grid-template-rows"] = value;
-    }
+
+    this.mounted();
   },
   destroyed() {
     if (this.columnSplit) {
@@ -311,6 +320,9 @@ Hooks.Presenter = {
   mounted() {
     this.presenter = new Presenter(this);
     this.presenter.init();
+  },
+  updated() {
+    this.presenter.update();
   },
 };
 Hooks.Manager = {

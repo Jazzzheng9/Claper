@@ -1,11 +1,19 @@
 ## v2.0.1
 
+### Features
+
+- Add Dutch translation #91 (@robinaartsma)
+- Add dynamic layout for the presenter view
+
 ### Fixes and improvements
 
 - Fix responsive layout on dashboard
 - Fix presenter layout with embeds when messages are hidden
 - Fix missing stream for form submits
 - Fix unknown locales
+- Add validation to avoid user to self assign as a facilitator
+- Toggle for message reactions is replaced with toggle for message and global reactions
+- Improve embed integration in presenter view
 
 ## v2.0.0
 
