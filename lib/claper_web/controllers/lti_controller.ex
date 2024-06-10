@@ -1,34 +1,125 @@
 defmodule ClaperWeb.LtiController do
   use ClaperWeb, :controller
 
-  alias Lti_1p3.Tool.Services.AGS.LineItem
   alias Lti_1p3.Tool.Services.AGS
   alias Lti_1p3.Tool.Services.AGS.Score
 
-  def register(conn, _params) do
-    # this jwk is the same jwk we generated in the section above
+  def bootstrap(conn, params) do
+    %{"openid_configuration" => conf, "registration_token" => token} = params
+    IO.inspect(conn)
+    IO.inspect(params)
+    render(conn, "register.html", conf: conf, token: token)
+  end
+
+  def re(conn, params) do
     {:ok, jwk} = Lti_1p3.get_active_jwk()
+
+    %{"openid_configuration" => conf, "registration_token" => token} = params
+    Finch.start_link(name: MyFinch)
+
+    {:ok, %{body: body}} = Finch.build(:post, conf) |> Finch.request(MyFinch)
+
+    {:ok,
+     %{
+       "issuer" => issuer,
+       "registration_endpoint" => reg_endpoint,
+       "jwks_uri" => jwks_uri,
+       "authorization_endpoint" => auth_endpoint,
+       "token_endpoint" => token_endpoint
+     }} = body |> Jason.decode()
+
+    IO.puts(reg_endpoint)
+
+    {:ok, %{body: body}} =
+      Finch.build(
+        :post,
+        reg_endpoint,
+        [
+          {"Authorization", "Bearer #{token}"},
+          {"Content-type", "application/json"},
+          {"Accept", "application/json"}
+        ],
+        body()
+      )
+      |> Finch.request(MyFinch)
+
+    {:ok, %{"client_id" => client_id}} = body |> Jason.decode()
 
     # Create a Registration, Details are typically provided by the platform administrator for this registration.
     {:ok, registration} =
       Lti_1p3.Tool.create_registration(%Lti_1p3.Tool.Registration{
-        issuer: "http://localhost.charlesproxy.com",
-        client_id: "NQQ8egz8Kj1s1qw",
-        key_set_url: "http://localhost.charlesproxy.com/mod/lti/certs.php",
-        auth_token_url: "http://localhost.charlesproxy.com/mod/lti/token.php",
-        auth_login_url: "http://localhost.charlesproxy.com/mod/lti/auth.php",
-        auth_server: "http://localhost.charlesproxy.com",
+        issuer: issuer,
+        client_id: client_id,
+        key_set_url: jwks_uri,
+        auth_token_url: token_endpoint,
+        auth_login_url: auth_endpoint,
+        auth_server: issuer,
         tool_jwk_id: jwk.id
       })
 
-    # Create a Deployment. Essentially this a unique identifier for a specific registration launch point,
-    # for which there can be many for a single registration. This will also typically be provided by a
-    # platform administrator.
+    # # Create a Deployment. Essentially this a unique identifier for a specific registration launch point,
+    # # for which there can be many for a single registration. This will also typically be provided by a
+    # # platform administrator.
     {:ok, _deployment} =
       Lti_1p3.Tool.create_deployment(%Lti_1p3.Tool.Deployment{
-        deployment_id: "2",
+        deployment_id: "1",
         registration_id: registration.id
       })
+
+    conn |> send_resp(200, "")
+  end
+
+  defp body() do
+    Jason.encode_to_iodata!(%{
+      "application_type" => "web",
+      "response_types" => ["id_token"],
+      "grant_types" => ["implict", "client_credentials"],
+      "initiate_login_uri" => "http://localhost:4000/lti/login",
+      "redirect_uris" => [
+        "http://localhost:4000/lti/launch"
+      ],
+      "client_name" => "Claper",
+      "jwks_uri" => "http://localhost:4000/.well-known/jwks.json",
+      "logo_uri" => "http://localhost:4000/images/logo.svg",
+      "token_endpoint_auth_method" => "private_key_jwt",
+      "scope" =>
+        "https://purl.imsglobal.org/spec/lti-ags/scope/score https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
+      "https://purl.imsglobal.org/spec/lti-tool-configuration" => %{
+        "domain" => "localhost:4000",
+        "description" => "Claper",
+        "target_link_uri" => "http://localhost:4000/lti/launch",
+        "claims" => ["iss", "sub", "name", "email", "given_name", "family_name"],
+        "launch_presentation_document_target" => "window"
+      }
+    })
+  end
+
+  def register(conn, params) do
+    {:ok, jwk} = Lti_1p3.get_active_jwk()
+
+    IO.inspect(conn)
+    IO.inspect(params)
+
+    # Create a Registration, Details are typically provided by the platform administrator for this registration.
+    # {:ok, registration} =
+    #   Lti_1p3.Tool.create_registration(%Lti_1p3.Tool.Registration{
+    #     issuer: "http://localhost.charlesproxy.com",
+    #     client_id: "NQQ8egz8Kj1s1qw",
+    #     key_set_url: "http://localhost.charlesproxy.com/mod/lti/certs.php",
+    #     auth_token_url: "http://localhost.charlesproxy.com/mod/lti/token.php",
+    #     auth_login_url: "http://localhost.charlesproxy.com/mod/lti/auth.php",
+    #     auth_server: "http://localhost.charlesproxy.com",
+    #     tool_jwk_id: jwk.id
+    #   })
+
+    # # Create a Deployment. Essentially this a unique identifier for a specific registration launch point,
+    # # for which there can be many for a single registration. This will also typically be provided by a
+    # # platform administrator.
+    # {:ok, _deployment} =
+    #   Lti_1p3.Tool.create_deployment(%Lti_1p3.Tool.Deployment{
+    #     deployment_id: "2",
+    #     registration_id: registration.id
+    #   })
 
     conn |> send_resp(201, "")
   end
@@ -146,27 +237,10 @@ defmodule ClaperWeb.LtiController do
   end
 
   def jwks(conn, _params) do
-    Lti_1p3.get_active_jwk() |> store_key()
-
     keys = Lti_1p3.get_all_public_keys()
 
     conn
     |> put_status(:ok)
     |> json(keys)
   end
-
-  defp store_key({:error, _}) do
-    {:ok, private_key} = File.read(Path.join(:code.priv_dir(:claper), "data/lti.key"))
-
-    {:ok, jwk} =
-      Lti_1p3.create_jwk(%Lti_1p3.Jwk{
-        pem: private_key,
-        typ: "JWT",
-        alg: "RS256",
-        kid: "BD02B7F2-01BE-4058-99F2-3BE9A7969107",
-        active: true
-      })
-  end
-
-  defp store_key(_), do: nil
 end

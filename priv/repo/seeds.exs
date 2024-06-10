@@ -10,12 +10,35 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-user =
-  %Claper.Accounts.User{
-    email: "admin@example.com",
-    confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    inserted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    is_admin: true
-  }
-  |> Claper.Repo.insert!()
+# create a default active lti_1p3 jwk
+if !Claper.Repo.get_by(Lti_1p3.DataProviders.EctoProvider.Jwk, id: 1) do
+  %{private_key: private_key} = Lti_1p3.KeyGenerator.generate_key_pair()
+
+  Lti_1p3.create_jwk(%Lti_1p3.Jwk{
+    pem: private_key,
+    typ: "JWT",
+    alg: "RS256",
+    kid: UUID.uuid4(),
+    active: true
+  })
+end
+
+# create lti_1p3 platform roles
+if !Claper.Repo.get_by(Lti_1p3.DataProviders.EctoProvider.PlatformRole, id: 1) do
+  Lti_1p3.Tool.PlatformRoles.list_roles()
+  |> Enum.map(fn t ->
+    struct(Lti_1p3.DataProviders.EctoProvider.PlatformRole, Map.from_struct(t))
+  end)
+  |> Enum.map(&Lti_1p3.DataProviders.EctoProvider.PlatformRole.changeset/1)
+  |> Enum.map(fn t -> Claper.Repo.insert!(t, on_conflict: :replace_all, conflict_target: :id) end)
+end
+
+# create lti_1p3 context roles
+if !Claper.Repo.get_by(Lti_1p3.DataProviders.EctoProvider.ContextRole, id: 1) do
+  Lti_1p3.Tool.ContextRoles.list_roles()
+  |> Enum.map(fn t ->
+    struct(Lti_1p3.DataProviders.EctoProvider.ContextRole, Map.from_struct(t))
+  end)
+  |> Enum.map(&Lti_1p3.DataProviders.EctoProvider.ContextRole.changeset/1)
+  |> Enum.map(fn t -> Claper.Repo.insert!(t, on_conflict: :replace_all, conflict_target: :id) end)
+end

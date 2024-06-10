@@ -8,7 +8,6 @@ defmodule Claper.Application do
   @impl true
   def start(_type, _args) do
     topologies = Application.get_env(:libcluster, :topologies) || []
-    {:ok, initial_state} = Lti_1p3.DataProviders.MemoryProvider.init()
 
     children = [
       {Cluster.Supervisor, [topologies, [name: Claper.ClusterSupervisor]]},
@@ -24,8 +23,7 @@ defmodule Claper.Application do
       # Start a worker by calling: Claper.Worker.start_link(arg)
       # {Claper.Worker, arg}
       {Finch, name: Swoosh.Finch},
-      {Task.Supervisor, name: Claper.TaskSupervisor},
-      {Lti_1p3.DataProviders.MemoryProvider, initial_state}
+      {Task.Supervisor, name: Claper.TaskSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

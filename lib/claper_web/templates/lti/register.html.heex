@@ -1,0 +1,7 @@
+<p>REGISTER</p>
+
+<form action={~p"/lti/re"} method="post">
+  <input type="hidden" name="openid_configuration" value={@conf} />
+  <input type="hidden" name="registration_token" value={@token} />
+  <input type="submit" value="Register" />
+</form>

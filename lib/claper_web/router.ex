@@ -130,10 +130,14 @@ defmodule ClaperWeb.Router do
 
     get("/.well-known/jwks.json", LtiController, :jwks)
     get("/lti/register", LtiController, :register)
+    post("/lti/register", LtiController, :register)
     post("/lti/login", LtiController, :login)
     get("/lti/login", LtiController, :login)
     post("/lti/launch", LtiController, :launch)
     get("/lti/grades", LtiController, :grades)
+
+    get("/lti/bootstrap", LtiController, :bootstrap)
+    post("/lti/re", LtiController, :re)
   end
 
   scope "/", ClaperWeb do

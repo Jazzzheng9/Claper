@@ -110,7 +110,8 @@ defmodule Claper.MixProject do
       {:gen_smtp, "~> 1.2"},
       {:csv, "~> 3.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:lti_1p3, "~> 0.4.5"}
+      {:joken, "~> 2.6.1"},
+      {:jose, "~> 1.11"}
     ]
   end
 
