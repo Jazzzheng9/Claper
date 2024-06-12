@@ -21,7 +21,7 @@ defmodule Lti13 do
       iex> get_active_jwk()
       {:ok, %Lti13.Jwk{}}
       iex> get_active_jwk()
-      {:error, %Lti13.DataProviderError{}}
+      {:error, %{}}
   """
   def get_active_jwk(), do: EctoProvider.get_active_jwk()
 
