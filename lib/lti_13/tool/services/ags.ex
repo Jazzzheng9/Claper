@@ -31,7 +31,7 @@ defmodule Lti13.Tool.Services.AGS do
            body,
            score_headers(access_token)
          ) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code in [200, 201] ->
+      {:ok, %Req.Response{status: code, body: body}} when code in [200, 201] ->
         {:ok, body}
 
       e ->
@@ -70,8 +70,8 @@ defmodule Lti13.Tool.Services.AGS do
 
     Logger.info("fetch_or_create_line_item: URL #{request_url}")
 
-    with {:ok, %HTTPoison.Response{status_code: code, body: body}} when code in [200, 201] <-
-           http_client!().get(request_url, headers(access_token)),
+    with {:ok, %Req.Response{status: code, body: body}} when code in [200, 201] <-
+           Req.get(request_url, headers: headers(access_token)),
          {:ok, result} <- Jason.decode(body) do
       case result do
         [] ->
@@ -128,8 +128,8 @@ defmodule Lti13.Tool.Services.AGS do
     # a thousand grade book entries.
     url = build_url_with_params(line_items_service_url, "limit=1000")
 
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <-
-           http_client!().get(url, headers(access_token)),
+    with {:ok, %Req.Response{status: 200, body: body}} <-
+           Req.get(url, headers: headers(access_token)),
          {:ok, results} <- Jason.decode(body) do
       {:ok, Enum.map(results, fn r -> to_line_item(r) end)}
     else
@@ -160,8 +160,8 @@ defmodule Lti13.Tool.Services.AGS do
 
     body = line_item |> Jason.encode!()
 
-    with {:ok, %HTTPoison.Response{status_code: code, body: body}} when code in [200, 201] <-
-           http_client!().post(line_items_service_url, body, headers(access_token)),
+    with {:ok, %Req.Response{status: code, body: body}} when code in [200, 201] <-
+           Req.post(line_items_service_url, body: body, headers: headers(access_token)),
          {:ok, result} <- Jason.decode(body) do
       {:ok, to_line_item(result)}
     else
@@ -194,8 +194,8 @@ defmodule Lti13.Tool.Services.AGS do
     # url to use is the id of the line item
     url = line_item.id
 
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <-
-           http_client!().put(url, body, headers(access_token)),
+    with {:ok, %Req.Response{status: 200, body: body}} <-
+           Req.put(url, body, headers(access_token)),
          {:ok, result} <- Jason.decode(body) do
       {:ok, to_line_item(result)}
     else

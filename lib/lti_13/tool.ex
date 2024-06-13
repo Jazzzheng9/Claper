@@ -1,5 +1,4 @@
 defmodule Lti13.Tool do
-
   alias Lti13.DataProviders.EctoProvider
 
   @doc """
@@ -10,8 +9,8 @@ defmodule Lti13.Tool do
       iex> create_deployment(deployment)
       {:error, %Lti_1p3.DataProviderError{}}
   """
-  def create_deployment(%Lti13.Tool.Deployment{} = deployment),
-    do: EctoProvider.create_deployment(deployment)
+  def create_deployment(attrs),
+    do: EctoProvider.create_deployment(attrs)
 
   @doc """
   Creates a new registration.
@@ -21,8 +20,8 @@ defmodule Lti13.Tool do
       iex> create_registration(registration)
       {:error, %Lti_1p3.DataProviderError{}}
   """
-  def create_registration(%Lti13.Tool.Registration{} = registration),
-    do: EctoProvider.create_registration(registration)
+  def create_registration(attrs),
+    do: EctoProvider.create_registration(attrs)
 
   @doc """
   Gets the registration with the given issuer and client_id.

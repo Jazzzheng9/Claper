@@ -12,8 +12,6 @@ defmodule Lti13.Tool.Services.NRPS do
   alias Lti13.Tool.Services.AccessToken
   alias Lti13.Tool.Services.NRPS.Membership
 
-  import Lti13.Config
-
   require Logger
 
   defp to_membership(raw) do
@@ -35,8 +33,8 @@ defmodule Lti13.Tool.Services.NRPS do
 
     url = context_memberships_url <> "?limit=1000"
 
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <-
-           http_client!().get(url, headers(access_token)),
+    with {:ok, %Req.Response{status: 200, body: body}} <-
+           Req.get(url, headers: headers(access_token)),
          {:ok, results} <- Jason.decode(body),
          members <- Map.get(results, "members") do
       {:ok, Enum.map(members, fn r -> to_membership(r) end)}

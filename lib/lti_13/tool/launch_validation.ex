@@ -1,10 +1,10 @@
-defmodule Lti1p3.Tool.LaunchValidation do
+defmodule Lti13.Tool.LaunchValidation do
   import Lti13.Utils
 
   alias Lti13.DataProviders.EctoProvider
 
   @message_validators [
-    Lti1p3.Tool.MessageValidators.ResourceMessageValidator
+    Lti13.Tool.MessageValidators.ResourceMessageValidator
   ]
 
   @type params() :: %{state: binary(), id_token: binary()}

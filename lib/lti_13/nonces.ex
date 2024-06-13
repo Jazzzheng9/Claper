@@ -1,5 +1,5 @@
 defmodule Lti13.Nonces do
-  alias Lti13.Nonce
+  alias Lti13.DataProviders.EctoProvider.Nonce
   alias Lti13.DataProviders.EctoProvider
 
   require Logger
@@ -21,10 +21,10 @@ defmodule Lti13.Nonces do
       iex> create_nonce("value", "domain")
       {:ok, %Nonce{}}
       iex> create_nonce("value", "domain")
-      {:error, %Lti_1p3.DataProviderError{}}
+      {:error, %{}}
   """
   def create_nonce(value, domain \\ nil),
-    do: EctoProvider.create_nonce(%Nonce{value: value, domain: domain})
+    do: EctoProvider.create_nonce(%{value: value, domain: domain})
 
   @doc """
   Removes all nonces older than the configured @max_nonce_ttl_sec value

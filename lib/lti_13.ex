@@ -1,8 +1,6 @@
 defmodule Lti13 do
-  import Lti13.Config
-
-  alias Lti13.Jwk
   alias Lti13.DataProviders.EctoProvider
+  alias Lti13.DataProviders.EctoProvider.Jwk
 
   @doc """
   Creates a new jwk.
@@ -12,14 +10,14 @@ defmodule Lti13 do
       iex> create_jwk(%Jwk{})
       {:error, %Lti13.DataProviderError{}}
   """
-  def create_jwk(%Jwk{} = jwk), do: EctoProvider.create_jwk(jwk)
+  def create_jwk(attrs), do: EctoProvider.create_jwk(attrs)
 
   @doc """
   Gets the currently active Jwk.
   If there are more that one active Jwk, this will return the first one it finds
   ## Examples
       iex> get_active_jwk()
-      {:ok, %Lti13.Jwk{}}
+      {:ok, %Jwk{}}
       iex> get_active_jwk()
       {:error, %{}}
   """

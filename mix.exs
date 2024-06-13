@@ -111,7 +111,9 @@ defmodule Claper.MixProject do
       {:csv, "~> 3.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:joken, "~> 2.6.1"},
-      {:jose, "~> 1.11"}
+      {:jose, "~> 1.11"},
+      {:req, "~> 0.5.0"},
+      {:uuid, "~> 1.1"}
     ]
   end
 

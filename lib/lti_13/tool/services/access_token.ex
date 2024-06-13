@@ -1,6 +1,8 @@
 defmodule Lti13.Tool.Services.AccessToken do
   alias Lti13.DataProviders.EctoProvider
 
+  use Joken.Config
+
   @enforce_keys [:access_token, :token_type, :expires_in, :scope]
   defstruct [:access_token, :token_type, :expires_in, :scope]
 
@@ -26,7 +28,7 @@ defmodule Lti13.Tool.Services.AccessToken do
 
       iex> fetch_access_token(registration, scopes, host)
       {:ok,
-        %Lti_1p3.Tool.Services.AccessToken{
+        %Lti13.Tool.Services.AccessToken{
           "scope" => "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
           "access_token" => "actual_access_token",
           "token_type" => "Bearer",
@@ -69,9 +71,11 @@ defmodule Lti13.Tool.Services.AccessToken do
     Logger.debug("client_assertion: #{inspect(client_assertion)}")
     Logger.debug("scopes #{inspect(scopes)}")
 
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <-
-           Req.post(url, body, headers),
-         {:ok, result} <- Jason.decode(body) do
+    IO.inspect(url)
+
+    with {:ok, %Req.Response{status: 200, body: body}} <-
+           Req.post(url, body: body, headers: headers),
+         {:ok, result} <- body do
       {:ok,
        %__MODULE__{
          access_token: Map.get(result, "access_token"),
@@ -92,7 +96,7 @@ defmodule Lti13.Tool.Services.AccessToken do
          auth_aud: auth_audience
        }) do
     # Get the active private key
-    {:ok, active_jwk} = EctoProvider.get_active_jwk()
+    active_jwk = EctoProvider.get_active_jwk()
 
     # Sign and return the JWT, include the kid of the key we are using
     # in the header.
@@ -106,7 +110,7 @@ defmodule Lti13.Tool.Services.AccessToken do
       "sub" => client_id
     }
 
-    {:ok, token, _} = Lti_1p3.JokenConfig.generate_and_sign(custom_claims, signer)
+    {:ok, token, _} = generate_and_sign(custom_claims, signer)
 
     token
   end

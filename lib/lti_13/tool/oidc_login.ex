@@ -1,6 +1,4 @@
 defmodule Lti13.Tool.OidcLogin do
-  import Lti13.Config
-
   alias Lti13.DataProviders.EctoProvider
 
   def oidc_login_redirect_url(params) do

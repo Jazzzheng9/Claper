@@ -1,7 +1,4 @@
 defmodule Lti13.Utils do
-  @moduledoc false
-  import Lti13.Config
-
   def registration_key_set_url(%{key_set_url: key_set_url}) do
     {:ok, key_set_url}
   end
@@ -60,44 +57,36 @@ defmodule Lti13.Utils do
   end
 
   def validate_timestamps(jwt) do
-    try do
-      case {Timex.from_unix(jwt["exp"]), Timex.from_unix(jwt["iat"])} do
-        {exp, iat} ->
-          # get the current time with a buffer of a few seconds to account for clock skew and rounding
-          now = Timex.now()
-          buffer_sec = 2
-          a_few_seconds_ago = now |> Timex.subtract(Timex.Duration.from_seconds(buffer_sec))
-          a_few_seconds_ahead = now |> Timex.add(Timex.Duration.from_seconds(buffer_sec))
+    current_time = DateTime.utc_now() |> DateTime.to_unix()
 
-          # check if jwt is expired and/or issued at invalid time
-          case {Timex.before?(exp, a_few_seconds_ago), Timex.after?(iat, a_few_seconds_ahead)} do
-            {false, false} ->
-              {:ok}
+    exp = Map.get(jwt, "exp")
+    iat = Map.get(jwt, "iat")
+    nbf = Map.get(jwt, "nbf")
 
-            {_, false} ->
-              {:error, %{reason: :invalid_jwt_timestamp, msg: "JWT exp is expired"}}
+    cond do
+      exp && current_time > exp ->
+        {:error, %{reason: :invalid_jwt_timestamp, msg: "JWT exp is expired"}}
 
-            {false, _} ->
-              {:error, %{reason: :invalid_jwt_timestamp, msg: "JWT iat is invalid"}}
+      iat && current_time < iat ->
+        {:error, %{reason: :invalid_jwt_timestamp, msg: "JWT iat is invalid"}}
 
-            _ ->
-              {:error, %{reason: :invalid_jwt_timestamp, msg: "JWT exp and iat are invalid"}}
-          end
-      end
-    rescue
-      _error -> {:error, %{reason: :invalid_jwt_timestamp, msg: "Timestamps are invalid"}}
+      nbf && current_time < nbf ->
+        {:error, %{reason: :invalid_jwt_timestamp, msg: "JWT nbf is invalid"}}
+
+      true ->
+        {:ok}
     end
   end
 
   def validate_nonce(jwt, domain) do
-    case Lti_1p3.Nonces.create_nonce(jwt["nonce"], domain) do
+    case Lti13.Nonces.create_nonce(jwt["nonce"], domain) do
       {:ok, _nonce} ->
         {:ok}
 
-      {:error, %Lti_1p3.DataProviderError{reason: :unique_constraint_violation}} ->
+      {:error, %{reason: :unique_constraint_violation}} ->
         {:error, %{reason: :invalid_nonce, msg: "Duplicate nonce"}}
 
-      {:error, %Lti_1p3.DataProviderError{msg: msg}} ->
+      {:error, %{msg: msg}} ->
         {:error, %{reason: :invalid_nonce, msg: msg}}
     end
   end
@@ -130,9 +119,9 @@ defmodule Lti13.Utils do
 
   def fetch_public_key(key_set_url, kid) do
     public_key_set =
-      case http_client!().get(key_set_url) do
-        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-          Jason.decode!(body)
+      case Req.get(key_set_url) do
+        {:ok, %Req.Response{status: 200, body: body}} ->
+          body
 
         error ->
           error

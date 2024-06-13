@@ -1,7 +1,8 @@
 defmodule ClaperWeb.Router do
   use ClaperWeb, :router
 
-  import ClaperWeb.{UserAuth, EventController, LtiController}
+  import ClaperWeb.{UserAuth, EventController}
+  import ClaperWeb.Lti.{RegistrationController, LaunchController, GradeController}
 
   pipeline :browser do
     plug(:accepts, ["html"])
@@ -128,16 +129,13 @@ defmodule ClaperWeb.Router do
   scope "/", ClaperWeb do
     pipe_through([:lti])
 
-    get("/.well-known/jwks.json", LtiController, :jwks)
-    get("/lti/register", LtiController, :register)
-    post("/lti/register", LtiController, :register)
-    post("/lti/login", LtiController, :login)
-    get("/lti/login", LtiController, :login)
-    post("/lti/launch", LtiController, :launch)
-    get("/lti/grades", LtiController, :grades)
-
-    get("/lti/bootstrap", LtiController, :bootstrap)
-    post("/lti/re", LtiController, :re)
+    get("/.well-known/jwks.json", Lti.RegistrationController, :jwks)
+    get("/lti/register", Lti.RegistrationController, :new)
+    post("/lti/register", Lti.RegistrationController, :create)
+    post("/lti/login", Lti.LaunchController, :login)
+    get("/lti/login", Lti.LaunchController, :login)
+    post("/lti/launch", Lti.LaunchController, :launch)
+    get("/lti/grades", Lti.GradeController, :create)
   end
 
   scope "/", ClaperWeb do
