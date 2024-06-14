@@ -1,4 +1,4 @@
-defmodule Lti13.DataProviders.EctoProvider.Registration do
+defmodule Lti13.Registrations.Registration do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -10,10 +10,10 @@ defmodule Lti13.DataProviders.EctoProvider.Registration do
     field :auth_login_url, :string
     field :auth_server, :string
 
-    has_many :deployments, Lti13.DataProviders.EctoProvider.Deployment
-    belongs_to :tool_jwk, Lti13.DataProviders.EctoProvider.Jwk, foreign_key: :tool_jwk_id
+    has_many :deployments, Lti13.Deployments.Deployment
+    belongs_to :tool_jwk, Lti13.Jwks.Jwk, foreign_key: :tool_jwk_id
 
-    timestamps(type: :utc_datetime)
+    timestamps()
   end
 
   @doc false

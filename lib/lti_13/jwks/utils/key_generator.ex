@@ -1,4 +1,4 @@
-defmodule Lti13.KeyGenerator do
+defmodule Lti13.Jwks.Utils.KeyGenerator do
   @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
          |> String.split("", trim: true)
 

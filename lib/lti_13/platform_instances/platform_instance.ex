@@ -1,4 +1,4 @@
-defmodule Lti13.DataProviders.EctoProvider.PlatformInstance do
+defmodule Lti13.PlatformInstances.PlatformInstance do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -12,7 +12,7 @@ defmodule Lti13.DataProviders.EctoProvider.PlatformInstance do
     field :redirect_uris, :string
     field :target_link_uri, :string
 
-    timestamps(type: :utc_datetime)
+    timestamps()
   end
 
   @doc false

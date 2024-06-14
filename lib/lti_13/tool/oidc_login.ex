@@ -1,5 +1,5 @@
 defmodule Lti13.Tool.OidcLogin do
-  alias Lti13.DataProviders.EctoProvider
+  alias Lti13.Registrations
 
   def oidc_login_redirect_url(params) do
     with {:ok, _issuer, login_hint, registration} <- validate_oidc_login(params) do
@@ -68,7 +68,7 @@ defmodule Lti13.Tool.OidcLogin do
     client_id = params["client_id"]
     lti_deployment_id = params["lti_deployment_id"]
 
-    case EctoProvider.get_registration_by_issuer_client_id(issuer, client_id) do
+    case Registrations.get_registration_by_issuer_client_id(issuer, client_id) do
       nil ->
         {:error,
          %{

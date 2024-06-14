@@ -1,4 +1,4 @@
-defmodule Lti13.DataProviders.EctoProvider.Nonce do
+defmodule Lti13.Nonces.Nonce do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -6,7 +6,7 @@ defmodule Lti13.DataProviders.EctoProvider.Nonce do
     field :value, :string
     field :domain, :string
 
-    timestamps(type: :utc_datetime)
+    timestamps()
   end
 
   @doc false

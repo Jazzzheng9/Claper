@@ -14,8 +14,6 @@ defmodule Lti13.Tool.Services.AGS do
   alias Lti13.Tool.Services.AGS.LineItem
   alias Lti13.Tool.Services.AccessToken
 
-  import Lti13.Config
-
   require Logger
 
   @doc """
@@ -26,10 +24,10 @@ defmodule Lti13.Tool.Services.AGS do
 
     body = score |> Jason.encode!()
 
-    case http_client!().post(
+    case Rep.post(
            build_url_with_path(line_item.id, "scores"),
-           body,
-           score_headers(access_token)
+           body: body,
+           headers: score_headers(access_token)
          ) do
       {:ok, %Req.Response{status: code, body: body}} when code in [200, 201] ->
         {:ok, body}
@@ -195,8 +193,8 @@ defmodule Lti13.Tool.Services.AGS do
     url = line_item.id
 
     with {:ok, %Req.Response{status: 200, body: body}} <-
-           Req.put(url, body, headers(access_token)),
-         {:ok, result} <- Jason.decode(body) do
+           Req.put(url, body: body, headers: headers(access_token)),
+         {:ok, result} <- body do
       {:ok, to_line_item(result)}
     else
       e ->

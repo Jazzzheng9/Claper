@@ -6,7 +6,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
       add :value, :string
       add :domain, :string
 
-      timestamps(type: :timestamptz)
+      timestamps()
     end
 
     create unique_index(:lti_13_nonces, [:value, :domain], name: :value_domain_index)
@@ -18,7 +18,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
       add :kid, :string
       add :active, :boolean, default: false, null: false
 
-      timestamps(type: :timestamptz)
+      timestamps()
     end
 
     create table(:lti_13_registrations) do
@@ -31,7 +31,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
 
       add :tool_jwk_id, references(:lti_13_jwks)
 
-      timestamps(type: :timestamptz)
+      timestamps()
     end
 
     create table(:lti_13_deployments) do
@@ -39,20 +39,8 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
 
       add :registration_id, references(:lti_13_registrations, on_delete: :delete_all), null: false
 
-      timestamps(type: :timestamptz)
+      timestamps()
     end
-
-    create table(:lti_13_platform_roles) do
-      add :uri, :string
-    end
-
-    create unique_index(:lti_13_platform_roles, [:uri])
-
-    create table(:lti_13_context_roles) do
-      add :uri, :string
-    end
-
-    create unique_index(:lti_13_context_roles, [:uri])
 
     create table(:lti_13_platform_instances) do
       add :name, :string
@@ -64,7 +52,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
       add :redirect_uris, :text
       add :custom_params, :text
 
-      timestamps(type: :timestamptz)
+      timestamps()
     end
 
     create unique_index(:lti_13_platform_instances, :client_id)
@@ -74,7 +62,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
       add :session_user_id, :integer
       add :context, :string
 
-      timestamps(type: :timestamptz)
+      timestamps()
     end
 
     create unique_index(:lti_13_login_hints, :value)
@@ -100,7 +88,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
       add :phone_number_verified, :boolean
       add :address, :string
 
-      timestamps(type: :timestamptz)
+      timestamps()
     end
   end
 end

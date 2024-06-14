@@ -1,6 +1,5 @@
 defmodule Lti13.Tool.PlatformRoles do
-  alias Lti13.Tool.PlatformRole
-  alias Lti13.Tool.Lti13_User
+  alias Lti13.PlatformRoles.PlatformRole
 
   # Core system roles
   @system_administrator %PlatformRole{

@@ -1,9 +1,8 @@
-defmodule Lti13.Platform.AuthorizationRedirect do
-  import Lti13.Utils
-
-  alias Lti13.Platform.LoginHint
+defmodule Lti13.PlatformInstances.Utils.AuthorizationRedirect do
+  import Lti13.Jwks.Validator
+  alias Lti13.Jwks
+  alias Lti13.PlatformInstances
   alias Lti13.Platform.LoginHints
-  alias Lti13.DataProviders.EctoProvider
 
   @type params() :: %{state: binary(), id_token: binary()}
   @type user() :: %{id: integer()}
@@ -15,7 +14,7 @@ defmodule Lti13.Platform.AuthorizationRedirect do
           {:ok, binary(), binary(), binary()}
           | {:error, %{optional(atom()) => any(), reason: atom(), msg: String.t()}}
   def authorize_redirect(params, current_user, issuer, deployment_id) do
-    case EctoProvider.get_platform_instance_by_client_id(params["client_id"]) do
+    case PlatformInstances.get_platform_instance_by_client_id(params["client_id"]) do
       nil ->
         {:error,
          %{
@@ -35,7 +34,7 @@ defmodule Lti13.Platform.AuthorizationRedirect do
              {:ok} <- validate_client_id(params, client_id),
              {:ok} <- validate_redirect_uri(params, valid_redirect_uris),
              {:ok} <- validate_nonce(params, "authorize_redirect"),
-             {:ok, active_jwk} <- EctoProvider.get_active_jwk() do
+             {:ok, active_jwk} <- Jwks.get_active_jwk() do
           custom_header = %{"kid" => active_jwk.kid}
           signer = Joken.Signer.create("RS256", %{"pem" => active_jwk.pem}, custom_header)
           user_details = Map.from_struct(current_user)
@@ -119,7 +118,7 @@ defmodule Lti13.Platform.AuthorizationRedirect do
 
   defp validate_current_user(params, %{id: user_id}) do
     case LoginHints.get_login_hint_by_value(params["login_hint"]) do
-      %LoginHint{session_user_id: ^user_id} ->
+      %{session_user_id: ^user_id} ->
         {:ok}
 
       _ ->

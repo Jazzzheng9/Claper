@@ -1,40 +1,59 @@
 defmodule Lti13.Nonces do
-  alias Lti13.DataProviders.EctoProvider.Nonce
-  alias Lti13.DataProviders.EctoProvider
+  import Ecto.Query, warn: false
+  alias Claper.Repo
+  alias Lti13.Nonces.Nonce
 
-  require Logger
+  def get_nonce(value, domain \\ nil) do
+    case domain do
+      nil ->
+        Repo.get_by(Nonce, value: value)
 
-  @doc """
-  Gets a single nonce.
-  Returns nil if the Nonce does not exist.
-  ## Examples
-      iex> get_nonce(123)
-      %Nonce{}
-      iex> get_nonce(456)
-      nil
-  """
-  def get_nonce(id), do: EctoProvider.get_nonce(id)
-
-  @doc """
-  Creates a nonce. Returns a error if the nonce already exists
-  ## Examples
-      iex> create_nonce("value", "domain")
-      {:ok, %Nonce{}}
-      iex> create_nonce("value", "domain")
-      {:error, %{}}
-  """
-  def create_nonce(value, domain \\ nil),
-    do: EctoProvider.create_nonce(%{value: value, domain: domain})
-
-  @doc """
-  Removes all nonces older than the configured @max_nonce_ttl_sec value
-  """
-  def cleanup_nonce_store() do
-    Logger.info("Cleaning up expired LTI 1.3 nonces...")
-
-    nonce_ttl_sec = Lti13.Config.get(:nonce_ttl_sec)
-    EctoProvider.delete_expired_nonces(nonce_ttl_sec)
-
-    Logger.info("Nonce cleanup complete.")
+      domain ->
+        Repo.get_by(Nonce, value: value, domain: domain)
+    end
   end
+
+  def create_nonce(attrs) do
+    %Nonce{}
+    |> Nonce.changeset(attrs)
+    |> Repo.insert()
+    |> case do
+      {:error, %Ecto.Changeset{errors: [value: {_msg, [{:constraint, :unique} | _]}]} = changeset} ->
+        {:error,
+         %{
+           msg: maybe_changeset_error_to_str(changeset),
+           reason: :unique_constraint_violation
+         }}
+
+      nonce ->
+        nonce
+    end
+  end
+
+  # 86400 seconds = 24 hours
+  def delete_expired_nonces(nonce_ttl_sec \\ 86_4000) do
+    nonce_expiry = DateTime.utc_now() |> DateTime.add(-nonce_ttl_sec, :second)
+    Repo.delete_all(from(n in Nonce, where: n.inserted_at < ^nonce_expiry))
+  end
+
+  defp maybe_changeset_error_to_str(%Ecto.Changeset{} = changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", _to_string(value))
+      end)
+    end)
+    |> Enum.reduce("", fn {k, v}, acc ->
+      joined_errors = Enum.join(v, "; ")
+      "#{acc} #{k}: #{joined_errors}"
+    end)
+    |> String.trim()
+  end
+
+  defp maybe_changeset_error_to_str(no_changeset), do: no_changeset
+
+  defp _to_string(val) when is_list(val) do
+    Enum.join(val, ",")
+  end
+
+  defp _to_string(val), do: to_string(val)
 end

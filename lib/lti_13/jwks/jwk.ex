@@ -1,4 +1,4 @@
-defmodule Lti13.DataProviders.EctoProvider.Jwk do
+defmodule Lti13.Jwks.Jwk do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -9,9 +9,9 @@ defmodule Lti13.DataProviders.EctoProvider.Jwk do
     field :kid, :string
     field :active, :boolean, default: false
 
-    has_many :registrations, Lti13.DataProviders.EctoProvider.Registration, foreign_key: :tool_jwk_id
+    has_many :registrations, Lti13.Registrations.Registration, foreign_key: :tool_jwk_id
 
-    timestamps(type: :utc_datetime)
+    timestamps()
   end
 
   @doc false

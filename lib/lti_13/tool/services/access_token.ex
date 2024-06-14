@@ -1,4 +1,5 @@
 defmodule Lti13.Tool.Services.AccessToken do
+  alias Lti13.Jwks
   alias Lti13.DataProviders.EctoProvider
 
   use Joken.Config
@@ -71,8 +72,6 @@ defmodule Lti13.Tool.Services.AccessToken do
     Logger.debug("client_assertion: #{inspect(client_assertion)}")
     Logger.debug("scopes #{inspect(scopes)}")
 
-    IO.inspect(url)
-
     with {:ok, %Req.Response{status: 200, body: body}} <-
            Req.post(url, body: body, headers: headers),
          {:ok, result} <- body do
@@ -96,7 +95,7 @@ defmodule Lti13.Tool.Services.AccessToken do
          auth_aud: auth_audience
        }) do
     # Get the active private key
-    active_jwk = EctoProvider.get_active_jwk()
+    active_jwk = Jwks.get_active_jwk()
 
     # Sign and return the JWT, include the kid of the key we are using
     # in the header.

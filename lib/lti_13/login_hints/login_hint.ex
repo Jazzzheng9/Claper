@@ -1,4 +1,4 @@
-defmodule Lti13.DataProviders.EctoProvider.LoginHint do
+defmodule Lti13.LoginHints.LoginHint do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -7,7 +7,7 @@ defmodule Lti13.DataProviders.EctoProvider.LoginHint do
     field :session_user_id, :integer
     field :context, :string
 
-    timestamps(type: :utc_datetime)
+    timestamps()
   end
 
   @doc false

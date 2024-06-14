@@ -1,13 +1,13 @@
-defmodule Lti13.DataProviders.EctoProvider.Deployment do
+defmodule Lti13.Deployments.Deployment do
   use Ecto.Schema
   import Ecto.Changeset
 
   schema "lti_13_deployments" do
     field :deployment_id, :string
 
-    belongs_to :registration, Lti13.DataProviders.EctoProvider.Registration
+    belongs_to :registration, Lti13.Registrations.Registration
 
-    timestamps(type: :utc_datetime)
+    timestamps()
   end
 
   @doc false

@@ -7,7 +7,7 @@ defmodule ClaperWeb.Lti.RegistrationController do
   end
 
   def create(conn, params) do
-    jwk = Lti13.get_active_jwk()
+    jwk = Lti13.Jwks.get_active_jwk()
 
     %{"openid_configuration" => conf, "registration_token" => token} = params
 
@@ -39,7 +39,7 @@ defmodule ClaperWeb.Lti.RegistrationController do
     } = body
 
     {:ok, registration} =
-      Lti13.Tool.create_registration(%{
+      Lti13.Registrations.create_registration(%{
         issuer: issuer,
         client_id: client_id,
         key_set_url: jwks_uri,
@@ -50,7 +50,7 @@ defmodule ClaperWeb.Lti.RegistrationController do
       })
 
     {:ok, _deployment} =
-      Lti13.Tool.create_deployment(%{
+      Lti13.Deployments.create_deployment(%{
         deployment_id: deployment_id,
         registration_id: registration.id
       })
@@ -84,7 +84,7 @@ defmodule ClaperWeb.Lti.RegistrationController do
   end
 
   def jwks(conn, _params) do
-    keys = Lti13.get_all_public_keys()
+    keys = Lti13.Jwks.get_all_public_keys()
 
     conn
     |> put_status(:ok)

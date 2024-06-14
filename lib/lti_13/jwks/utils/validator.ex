@@ -1,4 +1,4 @@
-defmodule Lti13.Utils do
+defmodule Lti13.Jwks.Validator do
   def registration_key_set_url(%{key_set_url: key_set_url}) do
     {:ok, key_set_url}
   end
@@ -79,7 +79,7 @@ defmodule Lti13.Utils do
   end
 
   def validate_nonce(jwt, domain) do
-    case Lti13.Nonces.create_nonce(jwt["nonce"], domain) do
+    case Lti13.Nonces.create_nonce(%{value: jwt["nonce"], domain: domain}) do
       {:ok, _nonce} ->
         {:ok}
 

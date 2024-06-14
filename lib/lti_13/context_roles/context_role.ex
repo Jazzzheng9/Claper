@@ -1,4 +1,4 @@
-defmodule Lti13.Tool.PlatformRole do
+defmodule Lti13.ContextRoles.ContextRole do
   @enforce_keys [:uri]
   defstruct [:id, :uri]
 

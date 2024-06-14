@@ -1,7 +1,8 @@
 defmodule Lti13.Tool.LaunchValidation do
-  import Lti13.Utils
+  import Lti13.Jwks.Validator
 
-  alias Lti13.DataProviders.EctoProvider
+  alias Lti13.Deployments
+  alias Lti13.Registrations
 
   @message_validators [
     Lti13.Tool.MessageValidators.ResourceMessageValidator
@@ -63,7 +64,7 @@ defmodule Lti13.Tool.LaunchValidation do
 
   defp validate_registration(params) do
     with {:ok, issuer, client_id} <- peek_issuer_client_id(params) do
-      case EctoProvider.get_registration_by_issuer_client_id(issuer, client_id) do
+      case Registrations.get_registration_by_issuer_client_id(issuer, client_id) do
         nil ->
           {:error,
            %{
@@ -92,7 +93,7 @@ defmodule Lti13.Tool.LaunchValidation do
 
   defp validate_deployment(registration, jwt_body) do
     deployment_id = jwt_body["https://purl.imsglobal.org/spec/lti/claim/deployment_id"]
-    deployment = EctoProvider.get_deployment(registration, deployment_id)
+    deployment = Deployments.get_deployment(registration, deployment_id)
 
     case deployment do
       nil ->
