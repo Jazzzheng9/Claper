@@ -78,6 +78,11 @@ defmodule Lti13.Jwks.Validator do
     end
   end
 
+  @spec validate_nonce(
+          Claper.Accounts.User.t(),
+          map(),
+          String.t()
+        ) :: {:ok} | {:error, %{msg: any(), reason: :invalid_nonce}}
   def validate_nonce(user, jwt, domain) do
     case Lti13.Nonces.create_nonce(%{value: jwt["nonce"], domain: domain, lti_user_id: user.id}) do
       {:ok, _nonce} ->

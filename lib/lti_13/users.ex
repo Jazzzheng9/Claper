@@ -11,7 +11,7 @@ defmodule Lti13.Users do
   end
 
   def get_user_by_sub(sub) do
-    Repo.get_by(User, sub: sub)
+    Repo.get_by(User, sub: sub) |> Repo.preload(:user)
   end
 
   def get_or_create_user(%{sub: sub, email: email} = attrs) do
@@ -23,7 +23,7 @@ defmodule Lti13.Users do
 
             case create_user(updated_attrs) do
               {:ok, user} ->
-                user
+                user |> Repo.preload(:user)
 
               {:error, _} ->
                 {:error, %{reason: :invalid_user, msg: "Invalid user"}}

@@ -25,10 +25,10 @@ defmodule Lti13.Tool.LaunchValidation do
          {:ok} <- validate_timestamps(jwt_body),
          {:ok} <- validate_deployment(registration, jwt_body),
          {:ok} <- validate_message(jwt_body),
-         {:ok, user} <- validate_user(jwt_body),
-         {:ok} <- validate_nonce(user, jwt_body, "validate_launch"),
+         {:ok, lti_user} <- validate_user(jwt_body),
+         {:ok} <- validate_nonce(lti_user, jwt_body, "validate_launch"),
          claims <- jwt_body do
-      {:ok, claims}
+      {:ok, %{claims: claims, lti_user: lti_user}}
     end
   end
 

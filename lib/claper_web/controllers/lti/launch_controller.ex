@@ -1,4 +1,5 @@
 defmodule ClaperWeb.Lti.LaunchController do
+  alias ClaperWeb.UserAuth
   use ClaperWeb, :controller
 
   def login(conn, params) do
@@ -24,23 +25,28 @@ defmodule ClaperWeb.Lti.LaunchController do
     case Lti13.Tool.LaunchValidation.validate(params, session_state) do
       {:ok,
        %{
-         "https://purl.imsglobal.org/spec/lti/claim/context" => %{
-           "label" => course_label,
-           "title" => course_title
-         },
-         "https://purl.imsglobal.org/spec/lti/claim/resource_link" => %{
-           "title" => resource_title,
-           "id" => resource_id
-         },
-         "sub" => user_id
-       } = claims} ->
+         lti_user: lti_user,
+         claims: %{
+           "https://purl.imsglobal.org/spec/lti/claim/context" => %{
+             "label" => course_label,
+             "title" => course_title
+           },
+           "https://purl.imsglobal.org/spec/lti/claim/resource_link" => %{
+             "title" => resource_title,
+             "id" => resource_id
+           },
+           "sub" => user_id
+         }
+       }} ->
         conn = conn |> put_session(:resource_id, resource_id) |> put_session(:user_id, user_id)
+        UserAuth.log_in_user(conn, lti_user.user)
+        redirect(conn, to: ~p"/events")
 
-        render(conn, "success.html",
-          course_label: course_label,
-          course_title: course_title,
-          resource_title: resource_title
-        )
+      # render(conn, "success.html",
+      #   course_label: course_label,
+      #   course_title: course_title,
+      #   resource_title: resource_title
+      # )
 
       {:error, %{reason: :invalid_registration, msg: msg, issuer: issuer, client_id: client_id}} ->
         render(conn, "error.html", msg: msg)
