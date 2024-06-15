@@ -1,7 +1,4 @@
 defmodule Lti13.Tool.MessageValidators.ResourceMessageValidator do
-
-  @behaviour Lti13.Tool.MessageValidator
-
   def can_validate(jwt_body) do
     jwt_body["https://purl.imsglobal.org/spec/lti/claim/message_type"] == "LtiResourceLinkRequest"
   end
@@ -10,8 +7,7 @@ defmodule Lti13.Tool.MessageValidators.ResourceMessageValidator do
     with {:ok} <- user_sub(jwt_body),
          {:ok} <- lti_version(jwt_body),
          {:ok} <- roles_claim(jwt_body),
-         {:ok} <- resource_link_id(jwt_body)
-    do
+         {:ok} <- resource_link_id(jwt_body) do
       {:ok}
     else
       {:error, error} -> {:error, error}
@@ -22,6 +18,7 @@ defmodule Lti13.Tool.MessageValidators.ResourceMessageValidator do
     case jwt_body["sub"] do
       nil ->
         {:error, "Must have a user (sub)"}
+
       _ ->
         {:ok}
     end
@@ -39,6 +36,7 @@ defmodule Lti13.Tool.MessageValidators.ResourceMessageValidator do
     case jwt_body["https://purl.imsglobal.org/spec/lti/claim/roles"] do
       nil ->
         {:error, "Missing Roles Claim"}
+
       _ ->
         {:ok}
     end
@@ -48,6 +46,7 @@ defmodule Lti13.Tool.MessageValidators.ResourceMessageValidator do
     case jwt_body["https://purl.imsglobal.org/spec/lti/claim/resource_link"]["id"] do
       nil ->
         {:error, "Missing Resource Link Id"}
+
       _ ->
         {:ok}
     end

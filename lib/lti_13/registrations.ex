@@ -1,7 +1,9 @@
 defmodule Lti13.Registrations do
   import Ecto.Query, warn: false
+  alias Lti13.Deployments.Deployment
   alias Claper.Repo
   alias Lti13.Registrations.Registration
+  alias Lti13.Jwks.Jwk
 
   def create_registration(attrs) do
     %Registration{}

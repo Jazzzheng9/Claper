@@ -2,9 +2,22 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
   use Ecto.Migration
 
   def change do
+    create table(:lti_13_users) do
+      add :sub, :string, null: false
+      add :name, :string
+      add :email, :string, null: false
+      add :roles, {:array, :string}, null: false
+      add :user_id, references(:users, on_delete: :delete_all), null: false
+
+      timestamps()
+    end
+
+    create unique_index(:lti_13_users, :sub)
+
     create table(:lti_13_nonces) do
       add :value, :string
       add :domain, :string
+      add :lti_user_id, references(:lti_13_users, on_delete: :delete_all), null: false
 
       timestamps()
     end
@@ -56,39 +69,5 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
     end
 
     create unique_index(:lti_13_platform_instances, :client_id)
-
-    create table(:lti_13_login_hints) do
-      add :value, :string
-      add :session_user_id, :integer
-      add :context, :string
-
-      timestamps()
-    end
-
-    create unique_index(:lti_13_login_hints, :value)
-
-    create table(:lti_13_users) do
-      add :sub, :string
-      add :name, :string
-      add :given_name, :string
-      add :family_name, :string
-      add :middle_name, :string
-      add :nickname, :string
-      add :preferred_username, :string
-      add :profile, :string
-      add :picture, :string
-      add :website, :string
-      add :email, :string
-      add :email_verified, :boolean
-      add :gender, :string
-      add :birthdate, :string
-      add :zoneinfo, :string
-      add :locale, :string
-      add :phone_number, :string
-      add :phone_number_verified, :boolean
-      add :address, :string
-
-      timestamps()
-    end
   end
 end

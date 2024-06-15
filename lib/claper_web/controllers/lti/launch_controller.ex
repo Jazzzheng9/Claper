@@ -34,7 +34,6 @@ defmodule ClaperWeb.Lti.LaunchController do
          },
          "sub" => user_id
        } = claims} ->
-        IO.inspect(claims)
         conn = conn |> put_session(:resource_id, resource_id) |> put_session(:user_id, user_id)
 
         render(conn, "success.html",

@@ -78,8 +78,8 @@ defmodule Lti13.Jwks.Validator do
     end
   end
 
-  def validate_nonce(jwt, domain) do
-    case Lti13.Nonces.create_nonce(%{value: jwt["nonce"], domain: domain}) do
+  def validate_nonce(user, jwt, domain) do
+    case Lti13.Nonces.create_nonce(%{value: jwt["nonce"], domain: domain, lti_user_id: user.id}) do
       {:ok, _nonce} ->
         {:ok}
 
@@ -88,6 +88,26 @@ defmodule Lti13.Jwks.Validator do
 
       {:error, %{msg: msg}} ->
         {:error, %{reason: :invalid_nonce, msg: msg}}
+    end
+  end
+
+  def validate_user(%{
+        "sub" => sub,
+        "name" => name,
+        "email" => email,
+        "https://purl.imsglobal.org/spec/lti/claim/roles" => roles
+      }) do
+    case Lti13.Users.get_or_create_user(%{
+           sub: sub,
+           name: name,
+           email: email,
+           roles: roles
+         }) do
+      {:error, _} ->
+        {:error, %{reason: :invalid_user, msg: "Invalid user"}}
+
+      user ->
+        {:ok, user}
     end
   end
 
@@ -127,8 +147,8 @@ defmodule Lti13.Jwks.Validator do
           error
       end
 
-    if is_container(public_key_set) do
-      case Enum.find(public_key_set["keys"], fn key -> is_container(key) && key["kid"] == kid end) do
+    if container?(public_key_set) do
+      case Enum.find(public_key_set["keys"], fn key -> container?(key) && key["kid"] == kid end) do
         nil ->
           return_key_not_found(kid)
 
@@ -145,7 +165,7 @@ defmodule Lti13.Jwks.Validator do
     end
   end
 
-  defp is_container(container) do
+  defp container?(container) do
     Keyword.keyword?(container) || is_map(container) || is_struct(container)
   end
 

@@ -24,7 +24,7 @@ defmodule Lti13.Tool.Services.AGS do
 
     body = score |> Jason.encode!()
 
-    case Rep.post(
+    case Req.post(
            build_url_with_path(line_item.id, "scores"),
            body: body,
            headers: score_headers(access_token)

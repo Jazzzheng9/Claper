@@ -1,6 +1,5 @@
 defmodule Lti13.Tool.Services.AccessToken do
   alias Lti13.Jwks
-  alias Lti13.DataProviders.EctoProvider
 
   use Joken.Config
 

@@ -2,7 +2,6 @@ defmodule ClaperWeb.Router do
   use ClaperWeb, :router
 
   import ClaperWeb.{UserAuth, EventController}
-  import ClaperWeb.Lti.{RegistrationController, LaunchController, GradeController}
 
   pipeline :browser do
     plug(:accepts, ["html"])
