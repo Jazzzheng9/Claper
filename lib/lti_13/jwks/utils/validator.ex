@@ -88,11 +88,8 @@ defmodule Lti13.Jwks.Validator do
       {:ok, _nonce} ->
         {:ok}
 
-      {:error, %{reason: :unique_constraint_violation}} ->
-        {:error, %{reason: :invalid_nonce, msg: "Duplicate nonce"}}
-
-      {:error, %{msg: msg}} ->
-        {:error, %{reason: :invalid_nonce, msg: msg}}
+      {:error, changeset} ->
+        {:error, %{reason: :invalid_nonce, msg: changeset}}
     end
   end
 

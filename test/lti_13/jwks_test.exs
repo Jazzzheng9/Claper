@@ -3,7 +3,8 @@ defmodule Lti13.JwksTest do
 
   alias Lti13.Jwks.Jwk
 
-  require Logger
+  import Lti13.JwksFixtures
+  import Lti13.RegistrationsFixtures
 
   describe "jwks" do
     test "create and get active jwk" do
@@ -59,6 +60,14 @@ defmodule Lti13.JwksTest do
                jwk2.kid,
                jwk3.kid
              ]
+    end
+
+    test "get jwk by registration" do
+      jwk = jwk_fixture()
+      jwk_id = jwk.id
+      registration = registration_fixture(%{tool_jwk_id: jwk_id})
+
+      assert %Jwk{id: ^jwk_id} = Lti13.Jwks.get_jwk_by_registration(registration)
     end
   end
 end

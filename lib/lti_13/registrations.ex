@@ -3,7 +3,6 @@ defmodule Lti13.Registrations do
   alias Lti13.Deployments.Deployment
   alias Claper.Repo
   alias Lti13.Registrations.Registration
-  alias Lti13.Jwks.Jwk
 
   def create_registration(attrs) do
     %Registration{}
@@ -28,14 +27,6 @@ defmodule Lti13.Registrations do
       {r, d} ->
         {r, d}
     end
-  end
-
-  def get_jwk_by_registration(%Registration{tool_jwk_id: tool_jwk_id}) do
-    Repo.one(
-      from(jwk in Jwk,
-        where: jwk.id == ^tool_jwk_id
-      )
-    )
   end
 
   def get_registration_by_issuer_client_id(issuer, client_id) do

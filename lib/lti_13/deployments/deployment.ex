@@ -3,7 +3,7 @@ defmodule Lti13.Deployments.Deployment do
   import Ecto.Changeset
 
   schema "lti_13_deployments" do
-    field :deployment_id, :string
+    field :deployment_id, :integer
 
     belongs_to :registration, Lti13.Registrations.Registration
 

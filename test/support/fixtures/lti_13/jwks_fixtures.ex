@@ -1,11 +1,11 @@
 defmodule Lti13.JwksFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Claper.Forms` context.
+  entities via the `Lti13.Jwks` context.
   """
 
   @doc """
-  Generate a form.
+  Generate a jwk.
   """
   def jwk_fixture(attrs \\ %{}) do
     {:ok, jwk} =

@@ -90,7 +90,7 @@ defmodule Lti13.Tool.LaunchValidation do
              "resource_title" => title,
              "resource_id" => resource_id
            }
-         } = claims,
+         },
          lti_user,
          registration
        ) do
@@ -129,7 +129,7 @@ defmodule Lti13.Tool.LaunchValidation do
 
   defp validate_deployment(registration, jwt_body) do
     deployment_id = jwt_body["https://purl.imsglobal.org/spec/lti/claim/deployment_id"]
-    deployment = Deployments.get_deployment(registration, deployment_id)
+    deployment = Deployments.get_deployment(registration.id, deployment_id)
 
     case deployment do
       nil ->

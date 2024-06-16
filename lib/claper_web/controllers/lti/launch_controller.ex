@@ -9,7 +9,7 @@ defmodule ClaperWeb.Lti.LaunchController do
         |> put_session("state", state)
         |> redirect(external: redirect_url)
 
-      {:error, %{reason: :invalid_registration, msg: msg, issuer: issuer, client_id: client_id}} ->
+      {:error, %{reason: :invalid_registration, msg: msg, issuer: _issuer, client_id: _client_id}} ->
         render(conn, "error.html", msg: msg)
 
       # handle_invalid_registration(conn, issuer, client_id)
@@ -28,11 +28,11 @@ defmodule ClaperWeb.Lti.LaunchController do
          lti_user: lti_user,
          claims: %{
            "https://purl.imsglobal.org/spec/lti/claim/context" => %{
-             "label" => course_label,
-             "title" => course_title
+             "label" => _course_label,
+             "title" => _course_title
            },
            "https://purl.imsglobal.org/spec/lti/claim/resource_link" => %{
-             "title" => resource_title,
+             "title" => _resource_title,
              "id" => resource_id
            },
            "sub" => user_id
@@ -48,15 +48,15 @@ defmodule ClaperWeb.Lti.LaunchController do
       #   resource_title: resource_title
       # )
 
-      {:error, %{reason: :invalid_registration, msg: msg, issuer: issuer, client_id: client_id}} ->
+      {:error, %{reason: :invalid_registration, msg: msg, issuer: _issuer, client_id: _client_id}} ->
         render(conn, "error.html", msg: msg)
 
       {:error,
        %{
          reason: :invalid_deployment,
          msg: msg,
-         registration_id: registration_id,
-         deployment_id: deployment_id
+         registration_id: _registration_id,
+         deployment_id: _deployment_id
        }} ->
         render(conn, "error.html", msg: msg)
 

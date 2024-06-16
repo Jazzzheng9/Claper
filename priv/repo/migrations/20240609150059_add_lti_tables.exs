@@ -52,7 +52,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
     create unique_index(:lti_13_nonces, [:value, :domain], name: :value_domain_index)
 
     create table(:lti_13_deployments) do
-      add :deployment_id, :string
+      add :deployment_id, :integer
 
       add :registration_id, references(:lti_13_registrations, on_delete: :delete_all), null: false
 
@@ -61,7 +61,7 @@ defmodule Claper.Repo.Migrations.AddLtiTables do
 
     create table(:lti_13_resources) do
       add :title, :string
-      add :resource_id, :string
+      add :resource_id, :integer
       add :event_id, references(:events, on_delete: :delete_all), null: false
 
       add :registration_id, references(:lti_13_registrations, on_delete: :delete_all), null: false

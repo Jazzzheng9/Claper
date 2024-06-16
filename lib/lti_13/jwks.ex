@@ -21,6 +21,14 @@ defmodule Lti13.Jwks do
     Repo.all(from(k in Jwk))
   end
 
+  def get_jwk_by_registration(%Lti13.Registrations.Registration{tool_jwk_id: tool_jwk_id}) do
+    Repo.one(
+      from(jwk in Jwk,
+        where: jwk.id == ^tool_jwk_id
+      )
+    )
+  end
+
   @doc """
   Gets a all public keys.
   ## Examples

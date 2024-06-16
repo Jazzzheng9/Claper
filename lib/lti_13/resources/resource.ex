@@ -4,7 +4,7 @@ defmodule Lti13.Resources.Resource do
 
   schema "lti_13_resources" do
     field :title, :string
-    field :resource_id, :string
+    field :resource_id, :integer
 
     belongs_to :event, Claper.Events.Event
     belongs_to :registration, Lti13.Registrations.Registration

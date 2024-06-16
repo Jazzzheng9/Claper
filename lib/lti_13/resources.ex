@@ -10,7 +10,9 @@ defmodule Lti13.Resources do
   end
 
   def get_resource_by_id_and_registration(resource_id, registration_id) do
-    from(r in Resource, where: r.resource_id == ^resource_id and r.registration_id == ^registration_id)
+    from(r in Resource,
+      where: r.resource_id == ^resource_id and r.registration_id == ^registration_id
+    )
     |> Repo.one()
   end
 
@@ -25,9 +27,7 @@ defmodule Lti13.Resources do
   """
   @spec create_resource_with_event(map()) ::
           {:ok, Claper.Events.Event.t(), Resource.t()} | {:error, map()}
-  def create_resource_with_event(
-        %{title: title, resource_id: resource_id, lti_user: lti_user} = attrs
-      ) do
+  def create_resource_with_event(%{title: title, resource_id: resource_id, lti_user: lti_user}) do
     with {:ok, event} <-
            Claper.Events.create_event(%{
              name: title,
