@@ -59,26 +59,40 @@ defmodule ClaperWeb.Lti.RegistrationController do
   end
 
   defp body() do
+    endpoint_config = Application.get_env(:claper, ClaperWeb.Endpoint)[:url]
+
+    default_ports = [80, 443]
+
+    port_suffix =
+      if endpoint_config[:port] in default_ports, do: "", else: ":#{endpoint_config[:port]}"
+
+    url = "#{endpoint_config[:scheme]}://#{endpoint_config[:host]}#{port_suffix}"
+
     Jason.encode_to_iodata!(%{
       "application_type" => "web",
       "response_types" => ["id_token"],
       "grant_types" => ["implict", "client_credentials"],
-      "initiate_login_uri" => "http://localhost:4000/lti/login",
+      "initiate_login_uri" => "#{url}/lti/login",
       "redirect_uris" => [
-        "http://localhost:4000/lti/launch"
+        "#{url}/lti/launch"
       ],
       "client_name" => "Claper",
-      "jwks_uri" => "http://localhost:4000/.well-known/jwks.json",
-      "logo_uri" => "http://localhost:4000/images/logo.svg",
+      "jwks_uri" => "#{url}/.well-known/jwks.json",
+      "logo_uri" => "#{url}/images/logo.svg",
       "token_endpoint_auth_method" => "private_key_jwt",
       "scope" =>
         "https://purl.imsglobal.org/spec/lti-ags/scope/score https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
       "https://purl.imsglobal.org/spec/lti-tool-configuration" => %{
-        "domain" => "localhost:4000",
-        "description" => "Claper",
-        "target_link_uri" => "http://localhost:4000/lti/launch",
-        "claims" => ["iss", "sub", "name", "email", "given_name", "family_name"],
-        "launch_presentation_document_target" => "window"
+        "domain" => "#{endpoint_config[:host]}#{port_suffix}",
+        "description" => "Create interactive presentations",
+        "target_link_uri" => "#{url}/lti/launch",
+        "custom_parameters" => %{
+          "context_start_date" => "$CourseSection.timeFrame.begin",
+          "context_end_date" => "$CourseSection.timeFrame.end",
+          "resource_title" => "$ResourceLink.title",
+          "resource_id" => "$ResourceLink.id"
+        },
+        "claims" => ["iss", "sub", "name", "email"]
       }
     })
   end

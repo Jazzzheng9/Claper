@@ -27,6 +27,7 @@ defmodule Lti13.Tool.LaunchValidation do
          {:ok} <- validate_message(jwt_body),
          {:ok, lti_user} <- validate_user(jwt_body),
          {:ok} <- validate_nonce(lti_user, jwt_body, "validate_launch"),
+         {:ok} <- validate_resource(jwt_body, lti_user, registration),
          claims <- jwt_body do
       {:ok, %{claims: claims, lti_user: lti_user}}
     end
@@ -80,6 +81,40 @@ defmodule Lti13.Tool.LaunchValidation do
           {:ok, registration}
       end
     end
+  end
+
+  defp validate_resource(
+         %{
+           "https://purl.imsglobal.org/spec/lti/claim/roles" => roles,
+           "https://purl.imsglobal.org/spec/lti/claim/custom" => %{
+             "resource_title" => title,
+             "resource_id" => resource_id
+           }
+         } = claims,
+         lti_user,
+         registration
+       ) do
+    if Enum.any?(roles, fn role -> role =~ ~r/Instructor/ end) do
+      case Lti13.Resources.get_resource_by_id_and_registration(resource_id, registration.id) do
+        nil ->
+          case Lti13.Resources.create_resource_with_event(%{
+                 title: title,
+                 resource_id: resource_id,
+                 lti_user: lti_user
+               }) do
+            {:ok, _resource, _event} ->
+              {:ok}
+
+            {:error, _} ->
+              {:error, %{reason: :invalid_resource, msg: "Failed to create resource"}}
+          end
+
+        resource ->
+          {:ok, resource}
+      end
+    end
+
+    {:ok}
   end
 
   defp peek_issuer_client_id(params) do

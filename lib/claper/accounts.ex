@@ -59,7 +59,7 @@ defmodule Claper.Accounts do
         })
 
       user ->
-        user
+        {:ok, user}
     end
   end
 

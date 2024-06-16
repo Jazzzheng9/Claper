@@ -9,6 +9,7 @@ defmodule Lti13.Users.User do
     field :roles, {:array, :string}
 
     belongs_to :user, Claper.Accounts.User
+    belongs_to :registration, Lti13.Registrations.Registration
 
     timestamps()
   end
@@ -21,9 +22,10 @@ defmodule Lti13.Users.User do
       :name,
       :roles,
       :email,
-      :user_id
+      :user_id,
+      :registration_id
     ])
-    |> validate_required([:sub, :name, :email, :roles, :user_id])
+    |> validate_required([:sub, :name, :email, :roles, :user_id, :registration_id])
     |> unique_constraint(:sub)
   end
 end

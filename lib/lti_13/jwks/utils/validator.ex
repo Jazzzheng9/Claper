@@ -100,18 +100,22 @@ defmodule Lti13.Jwks.Validator do
         "sub" => sub,
         "name" => name,
         "email" => email,
+        "iss" => issuer,
+        "aud" => client_id,
         "https://purl.imsglobal.org/spec/lti/claim/roles" => roles
       }) do
     case Lti13.Users.get_or_create_user(%{
            sub: sub,
            name: name,
            email: email,
-           roles: roles
+           roles: roles,
+           issuer: issuer,
+           client_id: client_id
          }) do
       {:error, _} ->
         {:error, %{reason: :invalid_user, msg: "Invalid user"}}
 
-      user ->
+      {:ok, user} ->
         {:ok, user}
     end
   end
