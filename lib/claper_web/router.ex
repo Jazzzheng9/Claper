@@ -16,6 +16,7 @@ defmodule ClaperWeb.Router do
 
   pipeline :lti do
     plug(:accepts, ["html", "json"])
+    plug(:put_root_layout, html: {ClaperWeb.LayoutView, :root})
     plug(:fetch_session)
     plug(:fetch_live_flash)
     plug(:fetch_current_user)

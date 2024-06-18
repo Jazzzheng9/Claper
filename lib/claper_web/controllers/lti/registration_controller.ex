@@ -1,9 +1,12 @@
 defmodule ClaperWeb.Lti.RegistrationController do
   use ClaperWeb, :controller
 
-  def new(conn, params) do
-    %{"openid_configuration" => conf, "registration_token" => token} = params
+  def new(conn, %{"openid_configuration" => conf, "registration_token" => token}) do
     render(conn, "new.html", conf: conf, token: token)
+  end
+
+  def new(conn, _params) do
+    conn |> render(ClaperWeb.ErrorView, "404.html")
   end
 
   def create(conn, params) do
