@@ -8,14 +8,14 @@ defmodule Lti13.Tool.LaunchValidation do
     Lti13.Tool.MessageValidators.ResourceMessageValidator
   ]
 
-  @type params() :: %{state: binary(), id_token: binary()}
-  @type validate_opts() :: []
+  @authorized_to_create_event_roles [
+    "http://purl.imsglobal.org/vocab/lis/v2/membership#Administrator",
+    "http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor"
+  ]
 
   @doc """
   Validates an incoming LTI 1.3 launch and returns the claims if successful.
   """
-  @spec validate(params(), validate_opts()) ::
-          {:ok, any()} | {:error, %{optional(atom()) => any(), reason: atom(), msg: String.t()}}
   def validate(params, session_state, _opts \\ []) do
     with {:ok} <- validate_oidc_state(params, session_state),
          {:ok, registration} <- validate_registration(params),
@@ -27,9 +27,10 @@ defmodule Lti13.Tool.LaunchValidation do
          {:ok} <- validate_message(jwt_body),
          {:ok, lti_user} <- validate_user(jwt_body),
          {:ok} <- validate_nonce(lti_user, jwt_body, "validate_launch"),
-         {:ok} <- validate_resource(jwt_body, lti_user, registration),
+         {:ok, is_instructor} <- validate_role(jwt_body),
+         {:ok, resource} <- validate_resource(jwt_body, lti_user, registration, is_instructor),
          claims <- jwt_body do
-      {:ok, %{claims: claims, lti_user: lti_user}}
+      {:ok, %{claims: claims, lti_user: lti_user, resource: resource}}
     end
   end
 
@@ -83,38 +84,72 @@ defmodule Lti13.Tool.LaunchValidation do
     end
   end
 
+  @spec validate_resource(
+          map(),
+          Lti13.Users.User.t(),
+          Lti13.Registrations.Registration.t(),
+          boolean()
+        ) :: {:ok, Lti13.Resources.Resource.t()} | {:error, map()}
   defp validate_resource(
          %{
-           "https://purl.imsglobal.org/spec/lti/claim/roles" => roles,
            "https://purl.imsglobal.org/spec/lti/claim/custom" => %{
              "resource_title" => title,
              "resource_id" => resource_id
            }
          },
          lti_user,
-         registration
+         registration,
+         is_instructor
        ) do
-    if Enum.any?(roles, fn role -> role =~ ~r/Instructor/ end) do
-      case Lti13.Resources.get_resource_by_id_and_registration(resource_id, registration.id) do
-        nil ->
-          case Lti13.Resources.create_resource_with_event(%{
-                 title: title,
-                 resource_id: resource_id,
-                 lti_user: lti_user
-               }) do
-            {:ok, _resource, _event} ->
-              {:ok}
+    case Lti13.Resources.get_resource_by_id_and_registration(resource_id, registration.id) do
+      nil ->
+        case is_instructor do
+          true ->
+            case Lti13.Resources.create_resource_with_event(%{
+                   title: title,
+                   resource_id: resource_id,
+                   lti_user: lti_user
+                 }) do
+              {:ok, resource} ->
+                {:ok, resource}
 
-            {:error, _} ->
-              {:error, %{reason: :invalid_resource, msg: "Failed to create resource"}}
-          end
+              {:error, _} ->
+                {:error, %{reason: :invalid_resource, msg: "Failed to create resource"}}
+            end
 
-        resource ->
-          {:ok, resource}
-      end
+          false ->
+            {:error,
+             %{reason: :invalid_resource, msg: "User is not authorized to create resource"}}
+        end
+
+      resource ->
+        case is_instructor do
+          true ->
+            with activity_leaders <-
+                   Claper.Events.get_activity_leaders_for_event(resource.event_id),
+                 activity_leaders_emails <- Enum.map(activity_leaders, fn al -> al.email end) do
+              if lti_user.email not in activity_leaders_emails &&
+                   resource.event.user_id != lti_user.user_id do
+                Claper.Events.create_activity_leader(%{
+                  email: lti_user.email,
+                  user_id: lti_user.id,
+                  event_id: resource.event_id
+                })
+              end
+            end
+
+            {:ok, resource}
+
+          false ->
+            {:ok, resource}
+        end
     end
+  end
 
-    {:ok}
+  defp validate_role(jwt) do
+    roles = jwt["https://purl.imsglobal.org/spec/lti/claim/roles"]
+    is_instructor = Enum.any?(roles, fn role -> role in @authorized_to_create_event_roles end)
+    {:ok, is_instructor}
   end
 
   defp peek_issuer_client_id(params) do

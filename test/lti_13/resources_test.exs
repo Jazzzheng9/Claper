@@ -80,7 +80,7 @@ defmodule Lti13.ResourcesTest do
         lti_user: lti_user
       }
 
-      assert {:ok, %Claper.Events.Event{} = event, %Resource{} = resource} =
+      assert {:ok, %Resource{event: %Claper.Events.Event{} = event} = resource} =
                Resources.create_resource_with_event(attrs)
 
       assert resource.title == "Resource 1"

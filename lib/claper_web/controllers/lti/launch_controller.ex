@@ -12,8 +12,6 @@ defmodule ClaperWeb.Lti.LaunchController do
       {:error, %{reason: :invalid_registration, msg: msg, issuer: _issuer, client_id: _client_id}} ->
         render(conn, "error.html", msg: msg)
 
-      # handle_invalid_registration(conn, issuer, client_id)
-
       {:error, %{reason: _reason, msg: msg}} ->
         render(conn, "error.html", msg: msg)
     end
@@ -36,17 +34,16 @@ defmodule ClaperWeb.Lti.LaunchController do
              "id" => resource_id
            },
            "sub" => user_id
-         }
+         },
+         resource: resource
        }} ->
-        conn = conn |> put_session(:resource_id, resource_id) |> put_session(:user_id, user_id)
-        UserAuth.log_in_user(conn, lti_user.user)
-        redirect(conn, to: ~p"/events")
+        conn =
+          conn
+          |> put_session(:resource_id, resource_id)
+          |> put_session(:user_id, user_id)
+          |> set_user_return_to(resource, lti_user)
 
-      # render(conn, "success.html",
-      #   course_label: course_label,
-      #   course_title: course_title,
-      #   resource_title: resource_title
-      # )
+        UserAuth.log_in_user(conn, lti_user.user)
 
       {:error, %{reason: :invalid_registration, msg: msg, issuer: _issuer, client_id: _client_id}} ->
         render(conn, "error.html", msg: msg)
@@ -62,6 +59,14 @@ defmodule ClaperWeb.Lti.LaunchController do
 
       {:error, %{reason: _reason, msg: msg}} ->
         render(conn, "error.html", msg: msg)
+    end
+  end
+
+  defp set_user_return_to(conn, resource, lti_user) do
+    if resource.event.user_id == lti_user.user_id do
+      conn |> put_session(:user_return_to, ~p"/events")
+    else
+      conn |> put_session(:user_return_to, ~p"/e/#{resource.event.code}")
     end
   end
 end

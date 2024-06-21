@@ -14,6 +14,7 @@ defmodule Lti13.Resources do
       where: r.resource_id == ^resource_id and r.registration_id == ^registration_id
     )
     |> Repo.one()
+    |> Repo.preload(:event)
   end
 
   @doc """
@@ -26,7 +27,7 @@ defmodule Lti13.Resources do
       {:error, %{reason: :invalid_resource, msg: "Failed to create resource"}}
   """
   @spec create_resource_with_event(map()) ::
-          {:ok, Claper.Events.Event.t(), Resource.t()} | {:error, map()}
+          {:ok, Resource.t()} | {:error, map()}
   def create_resource_with_event(%{title: title, resource_id: resource_id, lti_user: lti_user}) do
     with {:ok, event} <-
            Claper.Events.create_event(%{
@@ -35,6 +36,7 @@ defmodule Lti13.Resources do
                :crypto.strong_rand_bytes(10)
                |> Base.encode64()
                |> binary_part(0, 6)
+               |> to_string()
                |> String.upcase(),
              user_id: lti_user.user_id,
              started_at: NaiveDateTime.utc_now(),
@@ -51,7 +53,7 @@ defmodule Lti13.Resources do
              event_id: event.id,
              registration_id: lti_user.registration_id
            }) do
-      {:ok, event, resource}
+      {:ok, resource |> Map.put(:event, event)}
     else
       {:error, _} -> {:error, %{reason: :invalid_resource, msg: "Failed to create resource"}}
     end
