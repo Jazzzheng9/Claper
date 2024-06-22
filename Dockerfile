@@ -122,4 +122,4 @@ RUN mkdir /app/uploads && chmod -R 777 /app/uploads
 EXPOSE 4000
 WORKDIR "/app"
 USER root
-CMD ["sh", "-c", "/app/bin/claper eval Claper.Release.migrate && /app/bin/claper start"]
+CMD ["sh", "-c", "/app/bin/claper eval Claper.Release.migrate && /app/bin/claper eval Claper.Release.seeds && /app/bin/claper start"]
