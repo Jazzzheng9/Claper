@@ -35,9 +35,7 @@ defmodule Lti13.Resources do
              code:
                :crypto.strong_rand_bytes(10)
                |> Base.encode64()
-               |> binary_part(0, 6)
-               |> to_string()
-               |> String.upcase(),
+               |> binary_part(0, 6),
              user_id: lti_user.user_id,
              started_at: NaiveDateTime.utc_now(),
              presentation_file: %{
