@@ -33,9 +33,7 @@ defmodule Lti13.Resources do
            Claper.Events.create_event(%{
              name: title,
              code:
-               :crypto.strong_rand_bytes(10)
-               |> Base.encode64()
-               |> binary_part(0, 6),
+               :crypto.strong_rand_bytes(10) |> Base.encode16(case: :lower) |> binary_part(0, 6),
              user_id: lti_user.user_id,
              started_at: NaiveDateTime.utc_now(),
              presentation_file: %{
