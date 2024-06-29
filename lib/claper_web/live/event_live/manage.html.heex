@@ -40,7 +40,6 @@
           id="settings-modal-pane"
           module={ClaperWeb.EventLive.ManagerSettingsComponent}
           create={@create}
-          current_poll={@current_poll}
           state={@state}
           show_shortcut={false}
         />
@@ -186,7 +185,7 @@
             </li>
           </ul>
 
-          <%= if (length @polls)==0 && (length @forms)==0 && @event.presentation_file.length > 0 do %>
+          <%= if (length @interactions)==0 && @event.presentation_file.length > 0 do %>
             <div class="mt-10">
               <a
                 data-phx-link="patch"
@@ -515,100 +514,104 @@
     </div>
 
     <div
-      phx-hook="Split"
-      data-type="column"
-      data-gutter=".gutter-1"
-      id="layout"
-      class="grid grid-cols-[1fr_10px_1fr] overflow-y-auto"
+      phx-hook={"#{if @event.presentation_file.length > 0, do: 'Split', else: ''}"}
+      data-type="row"
+      data-gutter=".gutter"
+      id="base-layout"
+      class={"#{if @event.presentation_file.length > 0, do: 'grid grid-rows-[1fr_10px_1fr] overflow-y-auto', else: ''}"}
     >
       <div
-        id="slides"
-        class="bg-gray-100 overflow-y-auto"
-        data-tg-order="1"
-        data-tg-title={"#{gettext("Your slides and/or interactions")}"}
-        data-tg-tour={"<p class='mb-3'>#{gettext("This section contains all your presentation slides (if you have upload one). You have the option to add interactions to each slide.")}</p><p class='opacity-50 text-xs'>#{gettext("If you have slides, you can navigate through the slides with ease using the arrow keys on your keyboard.")}</p>"}
-        data-tg-group="manage"
+        :if={@event.presentation_file.length > 0}
+        id="slides-layout"
+        class="flex overflow-x-auto w-full h-full"
       >
-        <div class="flex flex-col items-center text-center">
-          <%= for index <- 0..max(0, @event.presentation_file.length-1) do %>
-            <%= if @state.position==index && @state.position> 0 do %>
+        <%= for index <- 0..max(0, @event.presentation_file.length-1) do %>
+          <button
+            id={"slide-preview-#{index}"}
+            phx-click="current-page"
+            phx-value-page={index}
+            class="h-full w-full contents"
+          >
+            <%= if Application.get_env(:claper, :presentations) |> Keyword.get(:storage) == "local" do %>
+              <img
+                class={"#{if @state.position==index, do: 'border-4 border-primary-500' , else: 'opacity-20' }
+                    w-full h-full transition-all object-contain"}
+                src={"/uploads/#{@event.presentation_file.hash}/#{index+1}.jpg"}
+              />
+            <% else %>
+              <img src={"https://#{Application.get_env(:claper, :presentations) |>
+                          Keyword.get(:aws_bucket)}.s3.#{Application.get_env(:ex_aws,
+                          :region)}.amazonaws.com/presentations/#{@event.presentation_file.hash}/#{index+1}.jpg"} />
+            <% end %>
+          </button>
+        <% end %>
+      </div>
+      <div
+        :if={@event.presentation_file.length > 0}
+        class="hidden md:block gutter col-span-full cursor-row-resize z-20 row-[2] bg-gray-50 text-center text-gray-300 text-sm leading-3"
+      >
+        •••
+      </div>
+      <div
+        phx-hook="Split"
+        data-type="column"
+        data-gutter=".gutter-1"
+        id="layout"
+        class="grid grid-cols-[1fr_10px_1fr] overflow-y-auto h-full"
+      >
+        <div
+          id="interactions"
+          class="bg-gray-100 overflow-y-auto"
+          data-tg-order="1"
+          data-tg-title={"#{gettext("Your slides and/or interactions")}"}
+          data-tg-tour={"<p class='mb-3'>#{gettext("This section contains all your presentation slides (if you have upload one). You have the option to add interactions to each slide.")}</p><p class='opacity-50 text-xs'>#{gettext("If you have slides, you can navigate through the slides with ease using the arrow keys on your keyboard.")}</p>"}
+          data-tg-group="manage"
+        >
+          <!-- Interactions -->
+          <div class="">
+            <div class="">
               <button
-                phx-click="current-page"
-                phx-value-page={index - 1}
-                class="w-12 h-12 float-left ml-5 focus:outline-none"
+                class="flex items-center justify-center px-3 py-2 text-white bg-primary-500 hover:bg-primary-600 rounded-md my-5 mx-auto text-xs"
+                phx-click={toggle_add_modal()}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  class="w-4 h-4"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                  <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
                 </svg>
+                <span><%= gettext("Add interaction") %></span>
               </button>
-            <% end %>
-
-            <div
-              class={"#{if @state.position==index, do: 'shadow-xl bg-white' , else: 'opacity-50 bg-gray-100' }
-                    transition-all pb-5"}
-              id={"slide-preview-#{index}"}
-            >
-              <button
-                phx-click="current-page"
-                phx-value-page={index}
-                class="py-4 focus:outline-none"
-              >
-                <%= if @event.presentation_file.length > 0 do %>
-                  <%= if Application.get_env(:claper, :presentations) |> Keyword.get(:storage) == "local" do %>
-                    <img
-                      class="w-1/3 mx-auto"
-                      src={"/uploads/#{@event.presentation_file.hash}/#{index+1}.jpg"}
-                    />
-                  <% else %>
-                    <img
-                      class="w-1/3 mx-auto"
-                      src={"https://#{Application.get_env(:claper, :presentations) |>
-                          Keyword.get(:aws_bucket)}.s3.#{Application.get_env(:ex_aws,
-                          :region)}.amazonaws.com/presentations/#{@event.presentation_file.hash}/#{index+1}.jpg"}
-                    />
-                  <% end %>
-                <% else %>
-                  <div class="w-screen bg-white h-4"></div>
-                <% end %>
-              </button>
-
-              <div class="flex flex-col space-y-3 w-full lg:w-1/2 mx-auto justify-start items-center">
-                <%= for poll <- Enum.filter(@polls, fn poll -> poll.position == index end) do %>
-                  <div class="flex space-x-2 items-center">
-                    <div class="flex h-8 w-8 flex-none text-white items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    <div class="flex space-x-2">
-                      <span>
-                        <span class="font-semibold">
-                                <%= gettext "Poll" %>
-                              </span>: <%= poll.title %>
-                      </span>
-                      <%= if @state.position==index do %>
-                        <%= if poll.enabled do %>
+              <%= for interaction <- @interactions do %>
+                <%= case interaction do %>
+                  <% %Claper.Polls.Poll{} -> %>
+                    <div class="flex space-x-2 items-center">
+                      <div class="flex h-8 w-8 flex-none text-white items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div class="flex space-x-2">
+                        <span>
+                          <span class="font-semibold"><%= gettext "Poll" %></span>: <%= interaction.title %>
+                        </span>
+                        <%= if interaction.enabled do %>
                           <button
                             phx-click="poll-set-inactive"
-                            phx-value-id={poll.id}
+                            phx-value-id={interaction.id}
                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-supporting-green-100 text-supporting-green-800"
                           >
                             <svg
@@ -624,7 +627,7 @@
                         <% else %>
                           <button
                             phx-click="poll-set-active"
-                            phx-value-id={poll.id}
+                            phx-value-id={interaction.id}
                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800"
                           >
                             <%= gettext("Set active") %>
@@ -633,7 +636,7 @@
                         <a
                           data-phx-link="patch"
                           data-phx-link-state="push"
-                          href={~p"/e/#{@event.code}/manage/edit/poll/#{poll.id}"}
+                          href={~p"/e/#{@event.code}/manage/edit/poll/#{interaction.id}"}
                           class="text-xs text-primary-500"
                         >
                           <svg
@@ -651,46 +654,34 @@
                             />
                           </svg>
                         </a>
-                      <% end %>
+                      </div>
                     </div>
-                  </div>
-                  <div class="h-4 border border-gray-300"></div>
-                <% end %>
-                <%= for form <- Enum.filter(@forms, fn form -> form.position == index end) do %>
-                  <div class="flex space-x-2 items-center">
-                    <div class="flex h-8 w-8 flex-none text-white items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="icon icon-tabler icon-tabler-forms"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M12 3a3 3 0 0 0 -3 3v12a3 3 0 0 0 3 3"></path>
-                        <path d="M6 3a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3"></path>
-                        <path d="M13 7h7a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-7"></path>
-                        <path d="M5 7h-1a1 1 0 0 0 -1 1v8a1 1 0 0 0 1 1h1"></path>
-                        <path d="M17 12h.01"></path>
-                        <path d="M13 12h.01"></path>
-                      </svg>
-                    </div>
+                  <% %Claper.Forms.Form{} -> %>
                     <div class="flex space-x-2 items-center">
-                      <span>
-                        <span class="font-semibold">
-                                    <%= gettext "Form" %>
-                                  </span>: <%= form.title %>
-                      </span>
-                      <%= if @state.position==index do %>
-                        <%= if form.enabled do %>
+                      <div class="flex h-8 w-8 flex-none text-white items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                          />
+                        </svg>
+                      </div>
+                      <div class="flex space-x-2">
+                        <span>
+                          <span class="font-semibold"><%= gettext "Form" %></span>: <%= interaction.title %>
+                        </span>
+                        <%= if interaction.enabled do %>
                           <button
                             phx-click="form-set-inactive"
-                            phx-value-id={form.id}
+                            phx-value-id={interaction.id}
                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-supporting-green-100 text-supporting-green-800"
                           >
                             <svg
@@ -706,7 +697,7 @@
                         <% else %>
                           <button
                             phx-click="form-set-active"
-                            phx-value-id={form.id}
+                            phx-value-id={interaction.id}
                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800"
                           >
                             <%= gettext("Set active") %>
@@ -715,7 +706,7 @@
                         <a
                           data-phx-link="patch"
                           data-phx-link-state="push"
-                          href={~p"/e/#{@event.code}/manage/edit/form/#{form.id}"}
+                          href={~p"/e/#{@event.code}/manage/edit/form/#{interaction.id}"}
                           class="text-xs text-primary-500"
                         >
                           <svg
@@ -733,38 +724,34 @@
                             />
                           </svg>
                         </a>
-                      <% end %>
+                      </div>
                     </div>
-                  </div>
-                  <div class="h-4 border border-gray-300"></div>
-                <% end %>
-                <%= for embed<- Enum.filter(@embeds, fn embed -> embed.position == index end) do %>
-                  <div class="flex space-x-2 items-center">
-                    <div class="flex h-8 w-8 flex-none text-white items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"
-                        />
-                      </svg>
-                    </div>
-                    <div class="flex space-x-2">
-                      <span>
-                        <span class="font-semibold"><%= gettext "Web content" %></span>: <%= embed.title %>
-                      </span>
-                      <%= if @state.position == index do %>
-                        <%= if embed.enabled do %>
+                  <% %Claper.Embeds.Embed{} -> %>
+                    <div class="flex space-x-2 items-center">
+                      <div class="flex h-8 w-8 flex-none text-white items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="w-5 h-5"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"
+                          />
+                        </svg>
+                      </div>
+                      <div class="flex space-x-2">
+                        <span>
+                          <span class="font-semibold"><%= gettext "Web content" %></span>: <%= interaction.title %>
+                        </span>
+                        <%= if interaction.enabled do %>
                           <button
                             phx-click="embed-set-inactive"
-                            phx-value-id={embed.id}
+                            phx-value-id={interaction.id}
                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-supporting-green-100 text-supporting-green-800"
                           >
                             <svg
@@ -780,7 +767,7 @@
                         <% else %>
                           <button
                             phx-click="embed-set-active"
-                            phx-value-id={embed.id}
+                            phx-value-id={interaction.id}
                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800"
                           >
                             <%= gettext("Set active") %>
@@ -789,7 +776,7 @@
                         <a
                           data-phx-link="patch"
                           data-phx-link-state="push"
-                          href={~p"/e/#{@event.code}/manage/edit/embed/#{embed.id}"}
+                          href={~p"/e/#{@event.code}/manage/edit/embed/#{interaction.id}"}
                           class="text-xs text-primary-500"
                         >
                           <svg
@@ -807,382 +794,345 @@
                             />
                           </svg>
                         </a>
-                      <% end %>
+                      </div>
                     </div>
-                  </div>
-                  <div class="h-4 border border-gray-300"></div>
+                  <% _ -> %>
+                    <!-- Handle any other types of interactions here if needed -->
                 <% end %>
-              </div>
-
-              <%= if @state.position==index do %>
-                <button
-                  class="flex items-center justify-center px-3 py-2 text-white bg-primary-500 hover:bg-primary-600 rounded-md my-5 mx-auto text-xs"
-                  phx-click={toggle_add_modal()}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    class="w-4 h-4"
-                  >
-                    <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
-                  </svg>
-                  <span><%= gettext("Add interaction") %></span>
-                </button>
               <% end %>
             </div>
+          </div>
+        </div>
 
-            <%= if @state.position==index && @state.position < @event.presentation_file.length - 1 do %>
-              <button
-                phx-click="current-page"
-                phx-value-page={index + 1}
-                class="w-12 h-12 float-left ml-5 focus:outline-none"
+        <div
+          class="gutter-1 row-span-full cursor-col-resize col-[2] bg-gray-50 text-center text-gray-300 text-sm leading-3"
+          style="writing-mode: vertical-rl"
+        >
+          •••
+        </div>
+
+        <div
+          id="ugc"
+          phx-hook="Split"
+          data-gutter=".gutter-2"
+          data-type="row"
+          class="md:grid grid-rows-[1fr_10px_1fr] overflow-y-auto"
+        >
+          <div
+            class="bg-gray-200 border-2 overflow-auto relative grid grid-rows-[auto_1fr] h-full w-full"
+            data-tg-title={"#{gettext("Attendees interactions")}"}
+            data-tg-order="2"
+            data-tg-tour={"<p class='mb-3'>#{gettext("Here you'll find all interactions from your attendees. You can manage messages, pinned messages, and submitted forms.")}</p><p class='opacity-50 text-xs'>#{gettext("Identify users by their unique avatars.")}</p>"}
+            data-tg-group="manage"
+          >
+            <ul
+              id="menu"
+              phx-update="replace"
+              class="flex flex-col md:flex-row md:flex items-center bg-gray-200 space-y-2 md:space-y-0 space-x-0 md:space-x-3 px-2 w-full py-3"
+            >
+              <li class={"rounded-md #{if @list_tab==:posts, do: 'bg-secondary-600 text-white' ,
+                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+                <%= link(gettext("Messages") <> " (#{@post_count})",
+                  to: "#",
+                  phx_click: "list-tab",
+                  phx_value_tab: :posts
+                ) %>
+              </li>
+              <li class={"rounded-md #{if @list_tab==:questions, do: 'bg-secondary-600 text-white' ,
+                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+                <%= link(gettext("Questions") <> " (#{@question_count})",
+                  to: "#",
+                  phx_click: "list-tab",
+                  phx_value_tab: :questions
+                ) %>
+              </li>
+              <li class={"rounded-md #{if @list_tab==:pinned_posts, do: 'bg-secondary-600 text-white' ,
+                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+                <%= link(gettext("Pinned messages") <> " (#{@pinned_post_count})",
+                  to: "#",
+                  phx_click: "list-tab",
+                  phx_value_tab: :pinned_posts
+                ) %>
+              </li>
+              <li class={"rounded-md #{if @list_tab==:forms, do: 'bg-secondary-600 text-white' ,
+                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+                <%= link(gettext("Form submissions") <> " (#{@form_submit_count})",
+                  to: "#",
+                  phx_click: "list-tab",
+                  phx_value_tab: :forms
+                ) %>
+              </li>
+            </ul>
+
+            <%= if @list_tab == :posts do %>
+              <div
+                :if={@post_count == 0}
+                class="text-center flex flex-col space-y-5 items-center justify-center text-gray-400"
+                style="height: 100%;"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6"
+                  class="h-36 w-36"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                  />
                 </svg>
-              </button>
+
+                <p class="text-lg">
+                  <%= gettext("Messages from attendees will appear here.") %>
+                </p>
+              </div>
+              <div
+                :if={@post_count > 0}
+                id="post-list"
+                class="overflow-y-auto pb-5 px-5"
+                phx-update="stream"
+                phx-hook="ScrollIntoDiv"
+              >
+                <.live_component
+                  :for={{id, post} <- @streams.posts}
+                  module={ClaperWeb.EventLive.ManageablePostComponent}
+                  id={id}
+                  event={@event}
+                  post={post}
+                />
+              </div>
             <% end %>
-          <% end %>
-        </div>
-      </div>
 
-      <div
-        class="gutter-1 row-span-full cursor-col-resize col-[2] bg-gray-50 text-center text-gray-300 text-sm leading-3"
-        style="writing-mode: vertical-rl"
-      >
-        •••
-      </div>
-
-      <div
-        id="ugc"
-        phx-hook="Split"
-        data-gutter=".gutter-2"
-        data-type="row"
-        class="md:grid grid-rows-[1fr_10px_1fr] overflow-y-auto"
-      >
-        <div
-          class="bg-gray-200 border-2 overflow-auto relative grid grid-rows-[auto_1fr] h-full w-full"
-          data-tg-title={"#{gettext("Attendees interactions")}"}
-          data-tg-order="2"
-          data-tg-tour={"<p class='mb-3'>#{gettext("Here you'll find all interactions from your attendees. You can manage messages, pinned messages, and submitted forms.")}</p><p class='opacity-50 text-xs'>#{gettext("Identify users by their unique avatars.")}</p>"}
-          data-tg-group="manage"
-        >
-          <ul
-            id="menu"
-            phx-update="replace"
-            class="flex flex-col md:flex-row md:flex items-center bg-gray-200 space-y-2 md:space-y-0 space-x-0 md:space-x-3 px-2 w-full py-3"
-          >
-            <li class={"rounded-md #{if @list_tab==:posts, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
-              <%= link(gettext("Messages") <> " (#{@post_count})",
-                to: "#",
-                phx_click: "list-tab",
-                phx_value_tab: :posts
-              ) %>
-            </li>
-            <li class={"rounded-md #{if @list_tab==:questions, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
-              <%= link(gettext("Questions") <> " (#{@question_count})",
-                to: "#",
-                phx_click: "list-tab",
-                phx_value_tab: :questions
-              ) %>
-            </li>
-            <li class={"rounded-md #{if @list_tab==:pinned_posts, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
-              <%= link(gettext("Pinned messages") <> " (#{@pinned_post_count})",
-                to: "#",
-                phx_click: "list-tab",
-                phx_value_tab: :pinned_posts
-              ) %>
-            </li>
-            <li class={"rounded-md #{if @list_tab==:forms, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
-              <%= link(gettext("Form submissions") <> " (#{@form_submit_count})",
-                to: "#",
-                phx_click: "list-tab",
-                phx_value_tab: :forms
-              ) %>
-            </li>
-          </ul>
-
-          <%= if @list_tab == :posts do %>
-            <div
-              :if={@post_count == 0}
-              class="text-center flex flex-col space-y-5 items-center justify-center text-gray-400"
-              style="height: 100%;"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-36 w-36"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-                />
-              </svg>
-
-              <p class="text-lg">
-                <%= gettext("Messages from attendees will appear here.") %>
-              </p>
-            </div>
-            <div
-              :if={@post_count > 0}
-              id="post-list"
-              class="overflow-y-auto pb-5 px-5"
-              phx-update="stream"
-              phx-hook="ScrollIntoDiv"
-            >
-              <.live_component
-                :for={{id, post} <- @streams.posts}
-                module={ClaperWeb.EventLive.ManageablePostComponent}
-                id={id}
-                event={@event}
-                post={post}
-              />
-            </div>
-          <% end %>
-
-          <%= if @list_tab == :questions do %>
-            <div
-              :if={@question_count == 0}
-              class="text-center flex flex-col space-y-5 items-center justify-center text-gray-400 h-full"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="w-36 h-36"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
-                />
-              </svg>
-
-              <p class="text-lg">
-                <%= gettext("Questions will appear here.") %>
-              </p>
-            </div>
-
-            <div :if={@question_count > 0} class="overflow-y-auto max-h-full">
-              <div class="px-5 w-full flex items-center gap-x-2">
-                <button
-                  class="bg-gray-300 text-gray-700 rounded-md px-3 py-1 flex items-center gap-x-1"
-                  phx-click="sort-questions"
-                  phx-value-sort="likes"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    class="w-4 h-4"
-                  >
-                    <path d="M2.09 15a1 1 0 0 0 1-1V8a1 1 0 1 0-2 0v6a1 1 0 0 0 1 1ZM5.765 13H4.09V8c.663 0 1.218-.466 1.556-1.037a4.02 4.02 0 0 1 1.358-1.377c.478-.292.907-.706.989-1.26V4.32a9.03 9.03 0 0 0 0-2.642c-.028-.194.048-.394.224-.479A2 2 0 0 1 11.09 3c0 .812-.08 1.605-.235 2.371a.521.521 0 0 0 .502.629h1.733c1.104 0 2.01.898 1.901 1.997a19.831 19.831 0 0 1-1.081 4.788c-.27.747-.998 1.215-1.793 1.215H9.414c-.215 0-.428-.035-.632-.103l-2.384-.794A2.002 2.002 0 0 0 5.765 13Z" />
-                  </svg>
-
-                  <p class="flex items-center gap-x-1">
-                    <%= gettext("Sort by popularity") %>
-                  </p>
-                </button>
-                <button
-                  class="bg-gray-300 text-gray-700 rounded-md px-3 py-1 flex items-center gap-x-1"
-                  phx-click="sort-questions"
-                  phx-value-sort="date"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    class="w-4 h-4"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-
-                  <span><%= gettext("Sort by date") %></span>
-                </button>
-              </div>
+            <%= if @list_tab == :questions do %>
               <div
-                id="question-list"
-                class="overflow-y-auto pb-5 px-5"
-                phx-update="stream"
-                phx-hook="ScrollIntoDiv"
+                :if={@question_count == 0}
+                class="text-center flex flex-col space-y-5 items-center justify-center text-gray-400 h-full"
               >
-                <.live_component
-                  :for={{id, post} <- @streams.questions}
-                  module={ClaperWeb.EventLive.ManageablePostComponent}
-                  id={id}
-                  event={@event}
-                  post={post}
-                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-36 h-36"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
+                  />
+                </svg>
+
+                <p class="text-lg">
+                  <%= gettext("Questions will appear here.") %>
+                </p>
               </div>
-            </div>
-          <% end %>
 
-          <%= if @list_tab == :pinned_posts do %>
-            <div
-              :if={@pinned_post_count == 0}
-              class="text-center flex flex-col space-y-5 items-center justify-center text-gray-400 h-full"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-36 w-36"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4" /><path d="M9 15l-4.5 4.5" /><path d="M14.5 4l5.5 5.5" />
-              </svg>
+              <div :if={@question_count > 0} class="overflow-y-auto max-h-full">
+                <div class="px-5 w-full flex items-center gap-x-2">
+                  <button
+                    class="bg-gray-300 text-gray-700 rounded-md px-3 py-1 flex items-center gap-x-1"
+                    phx-click="sort-questions"
+                    phx-value-sort="likes"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                      class="w-4 h-4"
+                    >
+                      <path d="M2.09 15a1 1 0 0 0 1-1V8a1 1 0 1 0-2 0v6a1 1 0 0 0 1 1ZM5.765 13H4.09V8c.663 0 1.218-.466 1.556-1.037a4.02 4.02 0 0 1 1.358-1.377c.478-.292.907-.706.989-1.26V4.32a9.03 9.03 0 0 0 0-2.642c-.028-.194.048-.394.224-.479A2 2 0 0 1 11.09 3c0 .812-.08 1.605-.235 2.371a.521.521 0 0 0 .502.629h1.733c1.104 0 2.01.898 1.901 1.997a19.831 19.831 0 0 1-1.081 4.788c-.27.747-.998 1.215-1.793 1.215H9.414c-.215 0-.428-.035-.632-.103l-2.384-.794A2.002 2.002 0 0 0 5.765 13Z" />
+                    </svg>
 
-              <p class="text-lg">
-                <%= gettext("Pinned messages will appear here.") %>
-              </p>
-            </div>
+                    <p class="flex items-center gap-x-1">
+                      <%= gettext("Sort by popularity") %>
+                    </p>
+                  </button>
+                  <button
+                    class="bg-gray-300 text-gray-700 rounded-md px-3 py-1 flex items-center gap-x-1"
+                    phx-click="sort-questions"
+                    phx-value-sort="date"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                      class="w-4 h-4"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
 
-            <div class="overflow-y-auto max-h-full">
+                    <span><%= gettext("Sort by date") %></span>
+                  </button>
+                </div>
+                <div
+                  id="question-list"
+                  class="overflow-y-auto pb-5 px-5"
+                  phx-update="stream"
+                  phx-hook="ScrollIntoDiv"
+                >
+                  <.live_component
+                    :for={{id, post} <- @streams.questions}
+                    module={ClaperWeb.EventLive.ManageablePostComponent}
+                    id={id}
+                    event={@event}
+                    post={post}
+                  />
+                </div>
+              </div>
+            <% end %>
+
+            <%= if @list_tab == :pinned_posts do %>
               <div
-                :if={@pinned_post_count > 0}
-                id="pinned-post-list"
-                class="overflow-y-auto pb-5 px-5"
-                phx-update="stream"
-                phx-hook="ScrollIntoDiv"
+                :if={@pinned_post_count == 0}
+                class="text-center flex flex-col space-y-5 items-center justify-center text-gray-400 h-full"
               >
-                <.live_component
-                  :for={{id, post} <- @streams.pinned_posts}
-                  module={ClaperWeb.EventLive.ManageablePostComponent}
-                  id={id}
-                  event={@event}
-                  post={post}
-                />
-              </div>
-            </div>
-          <% end %>
-
-          <%= if @list_tab == :forms do %>
-            <%= if @form_submit_count == 0 do %>
-              <div class="text-center h-full flex flex-col space-y-5 items-center justify-center text-gray-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-36 w-36"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  stroke-width="2"
                   stroke="currentColor"
                   fill="none"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <path d="M12 3a3 3 0 0 0 -3 3v12a3 3 0 0 0 3 3"></path>
-                  <path d="M6 3a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3"></path>
-                  <path d="M13 7h7a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-7"></path>
-                  <path d="M5 7h-1a1 1 0 0 0 -1 1v8a1 1 0 0 0 1 1h1"></path>
-                  <path d="M17 12h.01"></path>
-                  <path d="M13 12h.01"></path>
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4" /><path d="M9 15l-4.5 4.5" /><path d="M14.5 4l5.5 5.5" />
                 </svg>
 
                 <p class="text-lg">
-                  <%= gettext("Form submissions from attendees will appear here.") %>
+                  <%= gettext("Pinned messages will appear here.") %>
                 </p>
               </div>
-            <% end %>
-            <div
-              id="form-list"
-              class="overflow-y-auto max-h-full pb-5 px-5"
-              phx-update="stream"
-              data-forms-nb={@form_submit_count}
-              phx-hook="ScrollIntoDiv"
-            >
-              <div :for={{id, submission} <- @streams.form_submits} id={id}>
-                <div class="px-4 pb-2 pt-3 rounded-b-lg rounded-tr-lg bg-white relative shadow-md text-black break-all mt-4">
-                  <div class="float-right mr-1">
-                    <span class="text-red-500">
-                      <%= link(gettext("Delete"),
-                        to: "#",
-                        phx_click: "delete-form-submit",
-                        phx_value_id: submission.id,
-                        phx_value_event_id: @event.uuid,
-                        data: [confirm: gettext("This cannot be undone, confirm ?")]
-                      ) %>
-                    </span>
-                  </div>
 
-                  <p>
-                    <span class="font-semibold text-lg">
+              <div class="overflow-y-auto max-h-full">
+                <div
+                  :if={@pinned_post_count > 0}
+                  id="pinned-post-list"
+                  class="overflow-y-auto pb-5 px-5"
+                  phx-update="stream"
+                  phx-hook="ScrollIntoDiv"
+                >
+                  <.live_component
+                    :for={{id, post} <- @streams.pinned_posts}
+                    module={ClaperWeb.EventLive.ManageablePostComponent}
+                    id={id}
+                    event={@event}
+                    post={post}
+                  />
+                </div>
+              </div>
+            <% end %>
+
+            <%= if @list_tab == :forms do %>
+              <%= if @form_submit_count == 0 do %>
+                <div class="text-center h-full flex flex-col space-y-5 items-center justify-center text-gray-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-36 w-36"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 3a3 3 0 0 0 -3 3v12a3 3 0 0 0 3 3"></path>
+                    <path d="M6 3a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3"></path>
+                    <path d="M13 7h7a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-7"></path>
+                    <path d="M5 7h-1a1 1 0 0 0 -1 1v8a1 1 0 0 0 1 1h1"></path>
+                    <path d="M17 12h.01"></path>
+                    <path d="M13 12h.01"></path>
+                  </svg>
+
+                  <p class="text-lg">
+                    <%= gettext("Form submissions from attendees will appear here.") %>
+                  </p>
+                </div>
+              <% end %>
+              <div
+                id="form-list"
+                class="overflow-y-auto max-h-full pb-5 px-5"
+                phx-update="stream"
+                data-forms-nb={@form_submit_count}
+                phx-hook="ScrollIntoDiv"
+              >
+                <div :for={{id, submission} <- @streams.form_submits} id={id}>
+                  <div class="px-4 pb-2 pt-3 rounded-b-lg rounded-tr-lg bg-white relative shadow-md text-black break-all mt-4">
+                    <div class="float-right mr-1">
+                      <span class="text-red-500">
+                        <%= link(gettext("Delete"),
+                          to: "#",
+                          phx_click: "delete-form-submit",
+                          phx_value_id: submission.id,
+                          phx_value_event_id: @event.uuid,
+                          data: [confirm: gettext("This cannot be undone, confirm ?")]
+                        ) %>
+                      </span>
+                    </div>
+
+                    <p>
+                      <span class="font-semibold text-lg">
                         <%= gettext("Form") %>
                       </span>: <%= submission.form.title %>
-                  </p>
+                    </p>
 
-                  <div class="flex space-x-3 items-center">
-                    <%= if submission.attendee_identifier do %>
-                      <img
-                        class="h-8 w-8"
-                        src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}"}
-                      />
-                    <% else %>
-                      <img
-                        class="h-8 w-8"
-                        src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.user_id}"}
-                      />
-                    <% end %>
-
-                    <div>
-                      <%= for res <- submission.response do %>
-                        <p>
-                          <strong>
-                            <%= elem(res, 0) %>:
-                          </strong>
-                          <%= elem(res, 1) %>
-                        </p>
+                    <div class="flex space-x-3 items-center">
+                      <%= if submission.attendee_identifier do %>
+                        <img
+                          class="h-8 w-8"
+                          src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}"}
+                        />
+                      <% else %>
+                        <img
+                          class="h-8 w-8"
+                          src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.user_id}"}
+                        />
                       <% end %>
+
+                      <div>
+                        <%= for res <- submission.response do %>
+                          <p>
+                            <strong>
+                              <%= elem(res, 0) %>:
+                            </strong>
+                            <%= elem(res, 1) %>
+                          </p>
+                        <% end %>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          <% end %>
-        </div>
+            <% end %>
+          </div>
 
-        <div class="hidden md:block gutter-2 col-span-full cursor-row-resize z-20 row-[2] bg-gray-50 text-center text-gray-300 text-sm leading-3">
-          •••
-        </div>
+          <div class="hidden md:block gutter-2 col-span-full cursor-row-resize z-20 row-[2] bg-gray-50 text-center text-gray-300 text-sm leading-3">
+            •••
+          </div>
 
-        <div
-          class="hidden md:grid px-5 py-3 grid-cols-1 lg:grid-cols-2 z-20 bg-white"
-          data-tg-title={"#{gettext("Settings")}"}
-          data-tg-order="3"
-          data-tg-tour={"<p class='mb-3'>#{gettext("You can control each setting for the presentation (showing on the big screen) and on the attendee's room.")}</p><p class='opacity-50 text-xs'>#{gettext("Use the associated keyboard shortcuts for quick toggling of these settings.")}</p>"}
-          data-tg-group="manage"
-        >
-          <.live_component
-            id="settings-pane"
-            module={ClaperWeb.EventLive.ManagerSettingsComponent}
-            create={@create}
-            current_poll={@current_poll}
-            state={@state}
-          />
+          <div
+            class="hidden md:grid px-5 py-3 grid-cols-1 lg:grid-cols-2 z-20 bg-white"
+            data-tg-title={"#{gettext("Settings")}"}
+            data-tg-order="3"
+            data-tg-tour={"<p class='mb-3'>#{gettext("You can control each setting for the presentation (showing on the big screen) and on the attendee's room.")}</p><p class='opacity-50 text-xs'>#{gettext("Use the associated keyboard shortcuts for quick toggling of these settings.")}</p>"}
+            data-tg-group="manage"
+          >
+            <.live_component
+              id="settings-pane"
+              module={ClaperWeb.EventLive.ManagerSettingsComponent}
+              create={@create}
+              state={@state}
+            />
+          </div>
         </div>
       </div>
     </div>
