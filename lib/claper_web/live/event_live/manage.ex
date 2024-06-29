@@ -56,6 +56,10 @@ defmodule ClaperWeb.EventLive.Manage do
         |> assign(:question_count, length(questions))
         |> assign(:post_count, length(posts))
         |> assign(
+          :total_interactions,
+          Claper.Interactions.get_number_total_interactions(event.presentation_file.id)
+        )
+        |> assign(
           :form_submit_count,
           length(form_submits)
         )

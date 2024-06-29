@@ -5,7 +5,7 @@ defmodule ClaperWeb.EventLive.ManagerSettingsComponent do
     assigns = assigns |> assign_new(:show_shortcut, fn -> true end)
 
     ~H"""
-    <div>
+    <div class="grid grid-cols-1 md:grid-cols-2 grid-rows-1 space-x-2">
       <div>
         <span class="font-semibold text-lg">
           <%= gettext("Presentation settings") %>
