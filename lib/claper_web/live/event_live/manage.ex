@@ -66,6 +66,7 @@ defmodule ClaperWeb.EventLive.Manage do
         |> assign(:create, nil)
         |> assign(:list_tab, :posts)
         |> assign(:create_action, :new)
+        |> assign(:preview, false)
         |> push_event("page-manage", %{
           current_page: event.presentation_file.presentation_state.position,
           timeout: 500
@@ -682,6 +683,11 @@ defmodule ClaperWeb.EventLive.Manage do
     {:ok, _} = Polls.delete_poll(socket.assigns.event.uuid, poll)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("toggle-preview", _params, %{assigns: %{preview: preview}} = socket) do
+    {:noreply, socket |> assign(:preview, !preview)}
   end
 
   @impl true

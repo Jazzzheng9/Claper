@@ -195,7 +195,10 @@
     </div>
   </div>
   <!-- ONLINE BADGE -->
-  <div class="absolute z-20 bottom-5 right-5 px-4 pt-3 pb-1 rounded-md bg-black shadow-md text-white flex-1">
+  <div
+    :if={!@iframe}
+    class="absolute z-20 bottom-5 right-5 px-4 pt-3 pb-1 rounded-md bg-black shadow-md text-white flex-1"
+  >
     <div id="reacts" phx-hook="GlobalReacts" data-class-name="h-24" phx-update="ignore"></div>
 
     <div class="inline-flex justify-between items-center text-white text-2xl">

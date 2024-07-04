@@ -18,7 +18,7 @@ defmodule ClaperWeb.EventLive.ManagerSettingsComponent do
             shortcut={if @create == nil, do: "Q", else: nil}
           />
           <span>
-            <%= gettext("Show instructions") %>
+            <%= gettext("Show instructions (QR Code)") %>
             <code
               :if={@show_shortcut}
               class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg"

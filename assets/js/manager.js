@@ -50,6 +50,65 @@ export class Manager {
         }
       }
     });
+
+    this.initPreview();
+  }
+
+  initPreview() {
+    var preview = document.getElementById("preview");
+
+    if (preview) {
+      let isDragging = false;
+      let startX, startY;
+
+      preview.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX - preview.offsetLeft;
+        startY = e.clientY - preview.offsetTop;
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+
+        const newX = e.clientX - startX;
+        const newY = e.clientY - startY;
+
+        preview.style.left = `${newX}px`;
+        preview.style.top = `${newY}px`;
+      });
+
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const previewRect = preview.getBoundingClientRect();
+        const padding = 20; // Add 20px padding
+
+        let snapX, snapY;
+
+        if (previewRect.left < windowWidth / 2) {
+          snapX = padding;
+        } else {
+          snapX = windowWidth - previewRect.width - padding;
+        }
+
+        if (previewRect.top < windowHeight / 2) {
+          snapY = padding;
+        } else {
+          snapY = windowHeight - previewRect.height - padding;
+        }
+
+        preview.style.transition = "left 0.3s ease-out, top 0.3s ease-out";
+        preview.style.left = `${snapX}px`;
+        preview.style.top = `${snapY}px`;
+
+        // Remove the transition after it's complete
+        setTimeout(() => {
+          preview.style.transition = "";
+        }, 300);
+      });
+    }
   }
 
   update() {
@@ -70,6 +129,8 @@ export class Manager {
         });
       }, 50);
     }
+
+    this.initPreview();
   }
 
   nextPage() {
