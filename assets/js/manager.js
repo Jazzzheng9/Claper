@@ -22,7 +22,6 @@ export class Manager {
 
             slidesLayout.scrollTo({
               left: scrollPosition,
-              behavior: "smooth",
             });
           },
           data.timeout ? data.timeout : 0

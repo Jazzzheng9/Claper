@@ -9,7 +9,7 @@
   <div
     :if={@preview}
     id="preview"
-    class="h-1/3 w-1/3 bg-gray-200 absolute bottom-5 right-5 z-50 rounded-md shadow-base transform"
+    class="h-1/3 w-4/5 md:w-2/3 lg:w-1/3 bg-gray-200 absolute bottom-5 right-5 z-50 rounded-md shadow-base transform"
   >
     <button phx-click="toggle-preview" class="absolute top-2 right-2 text-white">
       <svg
@@ -345,7 +345,7 @@
           <div class="flex items-center gap-x-2 lg:hidden">
             <button
               phx-click="toggle-preview"
-              class="inline-flex items-center rounded-l-md px-5 py-1 hover:bg-secondary-50 text-base font-medium text-secondary-500 transition-all duration-500"
+              class="inline-flex items-center rounded-md px-5 py-1 bg-primary-50 text-base font-medium text-primary-500 transition-all duration-500"
             >
               <svg
                 :if={!@preview}
