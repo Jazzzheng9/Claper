@@ -61,6 +61,13 @@ export class Manager {
       let isDragging = false;
       let startX, startY;
 
+      let originalSnap = localStorage.getItem("preview-position");
+      if (originalSnap) {
+        let snaps = originalSnap.split(":");
+        preview.style.left = `${snaps[0]}px`;
+        preview.style.top = `${snaps[1]}px`;
+      }
+
       preview.addEventListener("mousedown", (e) => {
         isDragging = true;
         startX = e.clientX - preview.offsetLeft;
@@ -102,6 +109,8 @@ export class Manager {
         preview.style.transition = "left 0.3s ease-out, top 0.3s ease-out";
         preview.style.left = `${snapX}px`;
         preview.style.top = `${snapY}px`;
+
+        localStorage.setItem("preview-position", `${snapX}:${snapY}`);
 
         // Remove the transition after it's complete
         setTimeout(() => {
