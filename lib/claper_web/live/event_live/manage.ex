@@ -477,6 +477,8 @@ defmodule ClaperWeb.EventLive.Manage do
         %{"key" => "poll_visible", "value" => value},
         %{assigns: %{state: state}} = socket
       ) do
+    IO.inspect(value)
+
     {:ok, new_state} =
       Claper.Presentations.update_presentation_state(
         state,
