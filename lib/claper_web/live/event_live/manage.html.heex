@@ -628,7 +628,7 @@
             <%= if Application.get_env(:claper, :presentations) |> Keyword.get(:storage) == "local" do %>
               <img
                 class={"#{if @state.position==index, do: 'border-4 border-primary-500' , else: 'opacity-20' }
-                    w-full h-full transition-all object-contain"}
+                    transition-all object-contain"}
                 src={"/uploads/#{@event.presentation_file.hash}/#{index+1}.jpg"}
               />
             <% else %>
