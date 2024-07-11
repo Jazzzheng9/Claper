@@ -58,6 +58,41 @@
           />
         </svg>
       </button>
+      <button
+        phx-click="toggle-preview"
+        class="inline-flex items-center rounded-l-md px-5 py-1 hover:bg-secondary-50 text-base font-medium text-secondary-500 transition-all duration-500"
+      >
+        <svg
+          :if={!@preview}
+          xmlns="http://www.w3.org/2000/svg"
+          class="-ml-1 mr-2 h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+        </svg>
+
+        <svg
+          :if={@preview}
+          xmlns="http://www.w3.org/2000/svg"
+          class="-ml-1 mr-2 h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" /><path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" /><path d="M3 3l18 18" />
+        </svg>
+
+        <span :if={!@preview}><%= gettext("Open preview") %></span>
+        <span :if={@preview}><%= gettext("Close preview") %></span>
+      </button>
       <div id="settings-modal-content" class="bg-white p-4">
         <.live_component
           id="settings-modal-pane"
@@ -369,7 +404,7 @@
           </svg>
         </a>
         <div class="flex items-center justify-start gap-x-2">
-          <h2 class="text-xl font-bold leading-7 text-gray-900 sm:text-2xl sm:truncate">
+          <h2 class="text-xl font-bold leading-7 text-gray-900 md:text-2xl truncate w-24 md:w-auto">
             <%= @event.name %>
           </h2>
           <div class="flex gap-x-3 items-center">
@@ -480,41 +515,6 @@
             </button>
           </div>
           <div class="flex items-center gap-x-2 lg:hidden">
-            <button
-              phx-click="toggle-preview"
-              class="inline-flex items-center rounded-md px-5 py-1 bg-primary-50 text-base font-medium text-primary-500 transition-all duration-500"
-            >
-              <svg
-                :if={!@preview}
-                xmlns="http://www.w3.org/2000/svg"
-                class="-ml-1 mr-2 h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
-              </svg>
-
-              <svg
-                :if={@preview}
-                xmlns="http://www.w3.org/2000/svg"
-                class="-ml-1 mr-2 h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" /><path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" /><path d="M3 3l18 18" />
-              </svg>
-
-              <span :if={!@preview}><%= gettext("Open preview") %></span>
-              <span :if={@preview}><%= gettext("Close preview") %></span>
-            </button>
             <button phx-click={toggle_settings_modal()} class="mx-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -661,7 +661,7 @@
           data-tg-group="manage"
         >
           <!-- Interactions -->
-          <div class="h-full">
+          <div class="h-full @container">
             <div
               :if={length(@interactions) == 0}
               class="text-center flex flex-col space-y-5 items-center justify-center text-gray-400 h-full"
@@ -703,7 +703,7 @@
                 <span><%= gettext("Add interaction") %></span>
               </button>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            <div class="grid grid-cols-1 @sm:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 @lg:grid-cols-3 gap-4 p-4">
               <%= for interaction <- @interactions do %>
                 <div class="bg-white rounded-lg p-3 shadow-base transition-all flex flex-col justify-between">
                   <div>
@@ -904,7 +904,7 @@
                           <div
                             phx-hook="Dropdown"
                             id={"poll-settings-#{interaction.id}"}
-                            class="hidden rounded shadow-lg bg-white border px-1 py-1 z-20 -left-28 absolute text-sm top-10 w-max"
+                            class="hidden rounded shadow-lg bg-white border px-1 py-1 z-20 right-0 absolute text-sm top-10 w-max"
                           >
                             <ul>
                               <li>
@@ -1289,7 +1289,7 @@
           </div>
 
           <div
-            class="hidden md:block px-5 py-3 grid-cols-1 lg:grid-cols-2 z-20 bg-white"
+            class="hidden md:block px-5 py-3 z-20 bg-white @container"
             data-tg-title={"#{gettext("Settings")}"}
             data-tg-order="3"
             data-tg-tour={"<p class='mb-3'>#{gettext("You can control each setting for the presentation (showing on the big screen) and on the attendee's room.")}</p><p class='opacity-50 text-xs'>#{gettext("Use the associated keyboard shortcuts for quick toggling of these settings.")}</p>"}

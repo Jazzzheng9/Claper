@@ -67,23 +67,29 @@ export class Manager {
         preview.style.top = `${snaps[1]}px`;
       }
 
-      preview.addEventListener("mousedown", (e) => {
+      const startDrag = (e) => {
         isDragging = true;
-        startX = e.clientX - preview.offsetLeft;
-        startY = e.clientY - preview.offsetTop;
-      });
+        startX = (e.clientX || e.touches[0].clientX) - preview.offsetLeft;
+        startY = (e.clientY || e.touches[0].clientY) - preview.offsetTop;
+      };
 
-      document.addEventListener("mousemove", (e) => {
+      const drag = (e) => {
         if (!isDragging) return;
 
-        const newX = e.clientX - startX;
-        const newY = e.clientY - startY;
+        e.preventDefault();
+
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+
+        const newX = clientX - startX;
+        const newY = clientY - startY;
 
         preview.style.left = `${newX}px`;
         preview.style.top = `${newY}px`;
-      });
+      };
 
-      document.addEventListener("mouseup", () => {
+      const endDrag = () => {
+        if (!isDragging) return;
         isDragging = false;
 
         const windowWidth = window.innerWidth;
@@ -115,7 +121,16 @@ export class Manager {
         setTimeout(() => {
           preview.style.transition = "";
         }, 300);
-      });
+      };
+
+      preview.addEventListener("mousedown", startDrag);
+      preview.addEventListener("touchstart", startDrag);
+
+      document.addEventListener("mousemove", drag);
+      document.addEventListener("touchmove", drag);
+
+      document.addEventListener("mouseup", endDrag);
+      document.addEventListener("touchend", endDrag);
     }
   }
 
