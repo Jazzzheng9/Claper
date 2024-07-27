@@ -1,7 +1,7 @@
 defmodule ClaperWeb.Router do
   use ClaperWeb, :router
 
-  import ClaperWeb.{UserAuth, EventController}
+  import ClaperWeb.{UserAuth, EventController, UserOidcAuth}
 
   pipeline :browser do
     plug(:accepts, ["html"])
@@ -124,6 +124,9 @@ defmodule ClaperWeb.Router do
     post("/users/reset_password", UserResetPasswordController, :create)
     get("/users/reset_password/:token", UserResetPasswordController, :edit)
     post("/users/reset_password/:token", UserResetPasswordController, :update)
+
+    get("/users/oicd", UserOidcAuth, :new)
+    get("/users/oicd/callback", UserOidcAuth, :callback)
   end
 
   scope "/", ClaperWeb do

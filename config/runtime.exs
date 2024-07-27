@@ -82,6 +82,30 @@ same_site_cookie = get_var_from_path_or_env(config_dir, "SAME_SITE_COOKIE", "Lax
 secure_cookie =
   get_var_from_path_or_env(config_dir, "SECURE_COOKIE", "false") |> String.to_existing_atom()
 
+oidc_issuer = get_var_from_path_or_env(config_dir, "OIDC_ISSUER", "https://accounts.google.com")
+
+oidc_discovery_document_uri =
+  get_var_from_path_or_env(
+    config_dir,
+    "OIDC_DISCOVERY_DOCUMENT_URI",
+    "https://accounts.google.com/.well-known/openid-configuration"
+  )
+
+oidc_client_id = get_var_from_path_or_env(config_dir, "OIDC_CLIENT_ID", nil)
+oidc_client_secret = get_var_from_path_or_env(config_dir, "OIDC_CLIENT_SECRET", nil)
+oidc_redirect_uri = get_var_from_path_or_env(config_dir, "OIDC_REDIRECT_URI", nil)
+oidc_response_type = get_var_from_path_or_env(config_dir, "OIDC_RESPONSE_TYPE", "code")
+oidc_scope = get_var_from_path_or_env(config_dir, "OIDC_SCOPE", "openid email profile")
+
+config :claper, :oidc,
+  issuer: oidc_issuer,
+  discovery_document_uri: oidc_discovery_document_uri,
+  client_id: oidc_client_id,
+  client_secret: oidc_client_secret,
+  redirect_uri: oidc_redirect_uri,
+  response_type: oidc_response_type,
+  scope: oidc_scope
+
 config :claper, Claper.Repo,
   url: database_url,
   ssl: db_ssl,
