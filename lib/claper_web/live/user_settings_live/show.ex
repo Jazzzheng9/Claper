@@ -14,6 +14,12 @@ defmodule ClaperWeb.UserSettingsLive.Show do
     email_changeset = Accounts.User.email_changeset(%Accounts.User{}, %{})
     password_changeset = Accounts.User.password_changeset(%Accounts.User{}, %{})
 
+    oidc_accounts =
+      Accounts.get_all_oidc_users_by_email(socket.assigns.current_user.email) |> List.wrap()
+
+    lti_accounts =
+      Lti13.Users.get_all_users_by_email(socket.assigns.current_user.email) |> List.wrap()
+
     preferences_changeset =
       Accounts.User.preferences_changeset(
         socket.assigns.current_user,
@@ -24,7 +30,10 @@ defmodule ClaperWeb.UserSettingsLive.Show do
      socket
      |> assign(:email_changeset, email_changeset)
      |> assign(:password_changeset, password_changeset)
-     |> assign(:preferences_changeset, preferences_changeset)}
+     |> assign(:preferences_changeset, preferences_changeset)
+     |> assign(:is_external_user, oidc_accounts != [] or lti_accounts != [])
+     |> assign(:oidc_accounts, oidc_accounts)
+     |> assign(:lti_accounts, lti_accounts)}
   end
 
   @impl true
@@ -48,6 +57,32 @@ defmodule ClaperWeb.UserSettingsLive.Show do
       :page_description,
       gettext("Change the password used to access your account.")
     )
+  end
+
+  def handle_event(
+        "unlink",
+        %{"issuer" => issuer} = _params,
+        socket
+      ) do
+    Claper.Accounts.remove_oidc_user(socket.assigns.current_user, issuer)
+
+    {:noreply,
+     socket
+     |> put_flash(:info, gettext("The account has been unlinked."))
+     |> push_navigate(to: ~p"/users/settings")}
+  end
+
+  def handle_event(
+        "unlink",
+        %{"registration_id" => registration_id} = _params,
+        socket
+      ) do
+    Lti13.Users.remove_user(socket.assigns.current_user, registration_id)
+
+    {:noreply,
+     socket
+     |> put_flash(:info, gettext("The account has been unlinked."))
+     |> push_navigate(to: ~p"/users/settings")}
   end
 
   defp apply_action(socket, :show, _params) do

@@ -104,7 +104,7 @@
             </dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span class="flex-grow"><%= @current_user.email %></span>
-              <span class="ml-4 flex-shrink-0">
+              <span :if={!@is_external_user} class="ml-4 flex-shrink-0">
                 <.link
                   patch={~p"/users/settings/edit/email"}
                   class="rounded-md font-medium text-purple-600 hover:text-purple-500"
@@ -114,10 +114,10 @@
               </span>
             </dd>
 
-            <dt class="text-sm font-medium text-gray-500">
+            <dt :if={!@is_external_user} class="text-sm font-medium text-gray-500">
               <%= gettext("Password") %>
             </dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <dd :if={!@is_external_user} class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
               <span class="flex-grow">********</span>
               <span class="ml-4 flex-shrink-0">
                 <.link
@@ -128,6 +128,56 @@
                 </.link>
               </span>
             </dd>
+
+            <dt :if={@is_external_user} class="text-sm font-medium text-gray-500">
+              <%= gettext("Accounts linked") %>
+            </dt>
+            <%= for account <- @oidc_accounts do %>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <span class="flex-grow"><%= account.provider %></span>
+                <span class="ml-4 flex-shrink-0">
+                  <button
+                    phx-click="unlink"
+                    phx-value-issuer={account.issuer}
+                    data-confirm={
+                      if length(@oidc_accounts) + length(@lti_accounts) == 1 do
+                        gettext(
+                          "Are you sure you want to unlink this account? You will need to logout and ask for a new password to access your account again if you never had a password."
+                        )
+                      else
+                        gettext("Are you sure you want to unlink this account?")
+                      end
+                    }
+                    class="rounded-md font-medium text-purple-600 hover:text-purple-500"
+                  >
+                    <%= gettext("Unlink") %>
+                  </button>
+                </span>
+              </dd>
+            <% end %>
+            <%= for account <- @lti_accounts do %>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <span class="flex-grow">LMS (#<%= account.registration_id %>)</span>
+                <span class="ml-4 flex-shrink-0">
+                  <button
+                    phx-click="unlink"
+                    phx-value-registration_id={account.registration_id}
+                    data-confirm={
+                      if length(@oidc_accounts) + length(@lti_accounts) == 1 do
+                        gettext(
+                          "Are you sure you want to unlink this account? You will need to logout and ask for a new password to access your account again if you never had a password."
+                        )
+                      else
+                        gettext("Are you sure you want to unlink this account?")
+                      end
+                    }
+                    class="rounded-md font-medium text-purple-600 hover:text-purple-500"
+                  >
+                    <%= gettext("Unlink") %>
+                  </button>
+                </span>
+              </dd>
+            <% end %>
           </div>
         </dl>
       </div>
@@ -163,7 +213,7 @@
           </dl>
         </div>
       </div>
-      <div>
+      <div :if={!@is_external_user}>
         <div class="py-5">
           <h3 class="text-lg leading-6 font-medium text-gray-900">
             <%= gettext("Danger zone") %>

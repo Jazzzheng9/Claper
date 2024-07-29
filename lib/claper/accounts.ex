@@ -4,6 +4,7 @@ defmodule Claper.Accounts do
   """
 
   import Ecto.Query, warn: false
+  alias Claper.Accounts
   alias Claper.Repo
 
   alias Claper.Accounts.{User, UserToken, UserNotifier}
@@ -490,5 +491,50 @@ defmodule Claper.Accounts do
 
   def delete(user) do
     Repo.delete(user)
+  end
+
+  ## OIDC
+
+  def create_oidc_user(attrs) do
+    %Accounts.Oidc.User{}
+    |> Accounts.Oidc.User.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def remove_oidc_user(claper_user, issuer) do
+    Repo.delete_all(
+      from u in Accounts.Oidc.User,
+        where: u.issuer == ^issuer and u.user_id == ^claper_user.id
+    )
+  end
+
+  def get_all_oidc_users_by_email(email) do
+    Repo.all(from u in Accounts.Oidc.User, where: u.email == ^email)
+  end
+
+  def get_oidc_user_by_sub(sub) do
+    Repo.get_by(Accounts.Oidc.User, sub: sub)
+  end
+
+  def get_or_create_user_with_oidc(
+        %{
+          sub: sub
+        } = attrs
+      ) do
+    case get_oidc_user_by_sub(sub) do
+      nil -> create_new_user(attrs)
+      %Accounts.Oidc.User{} = user -> {:ok, user |> Repo.preload(:user)}
+    end
+  end
+
+  defp create_new_user(attrs) do
+    with {:ok, claper_user} <- get_user_by_email_or_create(attrs.email),
+         updated_attrs <-
+           Map.merge(attrs, %{user_id: claper_user.id}),
+         {:ok, user} <- create_oidc_user(updated_attrs) do
+      {:ok, user |> Repo.preload(:user)}
+    else
+      _ -> {:error, %{reason: :invalid_user, msg: "Invalid Claper user"}}
+    end
   end
 end

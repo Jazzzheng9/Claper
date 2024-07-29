@@ -84,27 +84,40 @@ secure_cookie =
 
 oidc_issuer = get_var_from_path_or_env(config_dir, "OIDC_ISSUER", "https://accounts.google.com")
 
-oidc_discovery_document_uri =
-  get_var_from_path_or_env(
-    config_dir,
-    "OIDC_DISCOVERY_DOCUMENT_URI",
-    "https://accounts.google.com/.well-known/openid-configuration"
-  )
-
 oidc_client_id = get_var_from_path_or_env(config_dir, "OIDC_CLIENT_ID", nil)
 oidc_client_secret = get_var_from_path_or_env(config_dir, "OIDC_CLIENT_SECRET", nil)
 oidc_redirect_uri = get_var_from_path_or_env(config_dir, "OIDC_REDIRECT_URI", nil)
 oidc_response_type = get_var_from_path_or_env(config_dir, "OIDC_RESPONSE_TYPE", "code")
-oidc_scope = get_var_from_path_or_env(config_dir, "OIDC_SCOPE", "openid email profile")
+oidc_scopes = get_var_from_path_or_env(config_dir, "OIDC_SCOPES", "openid email profile")
+oidc_provider_name = get_var_from_path_or_env(config_dir, "OIDC_PROVIDER_NAME", "OpenID Connect")
+oidc_logo_url = get_var_from_path_or_env(config_dir, "OIDC_LOGO_URL", "/images/icons/openid.png")
+
+oidc_property_mappings =
+  get_var_from_path_or_env(config_dir, "OIDC_PROPERTY_MAPPINGS", nil)
+  |> case do
+    nil ->
+      nil
+
+    mappings ->
+      String.split(mappings, ",")
+      |> Enum.map(&String.split(&1, ":"))
+      |> Enum.into(%{}, fn [key, value] -> {key, value} end)
+  end
+
+oidc_enabled =
+  !is_nil(oidc_client_id) and !is_nil(oidc_client_secret) and !is_nil(oidc_redirect_uri)
 
 config :claper, :oidc,
+  enabled: oidc_enabled,
   issuer: oidc_issuer,
-  discovery_document_uri: oidc_discovery_document_uri,
   client_id: oidc_client_id,
   client_secret: oidc_client_secret,
   redirect_uri: oidc_redirect_uri,
   response_type: oidc_response_type,
-  scope: oidc_scope
+  scopes: String.split(oidc_scopes, " "),
+  provider_name: oidc_provider_name,
+  logo_url: oidc_logo_url,
+  property_mappings: oidc_property_mappings
 
 config :claper, Claper.Repo,
   url: database_url,

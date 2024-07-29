@@ -27,7 +27,7 @@
           </div>
           <div class="flex flex-row justify-center items-center space-x-3"></div>
 
-          <.form :let={f} for={@conn} action={~p"/users/log_in"} as={:user} class="mt-12 mb-4">
+          <.form :let={f} for={@conn} action={~p"/users/log_in"} as={:user} class="mt-12">
             <%= if @error_message do %>
               <ClaperWeb.Component.Alert.error message={@error_message} stick={true} />
             <% end %>
@@ -62,21 +62,24 @@
             </div>
           </.form>
 
-          <div class="mt-6">
-            <%= link("Log in with OpenID Connect",
-              to: ~p"/users/oicd",
+          <div :if={@oidc_enabled}>
+            <%= link(
+              to: ~p"/users/oidc",
               class:
-                "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            ) %>
+                "w-full flex justify-center items-center gap-x-2 py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white border-2 border-secondary-500 hover:bg-secondary-500 hover:bg-opacity-40"
+            ) do %>
+              <img width="24" src={@oidc_logo_url} />
+              <span><%= gettext("Login with %{provider}", provider: @oidc_provider_name) %></span>
+            <% end %>
           </div>
 
-          <div class="mt-4 text-center flex gap-x-2 justify-center">
+          <div class="mt-4 text-center justify-center">
             <%= link(gettext("Forgot your password?"),
               to: ~p"/users/reset_password",
               class: "text-white text-sm text-center"
             ) %>
             <%= if Application.get_env(:claper, :enable_account_creation) do %>
-              <%= link(gettext("Create account"),
+              <span class="text-white">•</span> <%= link(gettext("Create account"),
                 to: ~p"/users/register",
                 class: "text-white text-sm text-center"
               ) %>

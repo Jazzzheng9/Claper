@@ -125,8 +125,8 @@ defmodule ClaperWeb.Router do
     get("/users/reset_password/:token", UserResetPasswordController, :edit)
     post("/users/reset_password/:token", UserResetPasswordController, :update)
 
-    get("/users/oicd", UserOidcAuth, :new)
-    get("/users/oicd/callback", UserOidcAuth, :callback)
+    get("/users/oidc", UserOidcAuth, :new)
+    get("/users/oidc/callback", UserOidcAuth, :callback)
   end
 
   scope "/", ClaperWeb do

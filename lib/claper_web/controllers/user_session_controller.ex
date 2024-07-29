@@ -5,8 +5,17 @@ defmodule ClaperWeb.UserSessionController do
   alias ClaperWeb.UserAuth
 
   def new(conn, _params) do
+    oidc_provider_name = Application.get_env(:claper, :oidc)[:provider_name]
+    oidc_logo_url = Application.get_env(:claper, :oidc)[:logo_url]
+    oidc_enabled = Application.get_env(:claper, :oidc)[:enabled]
+
     conn
-    |> render("new.html", error_message: nil)
+    |> render("new.html",
+      error_message: nil,
+      oidc_provider_name: oidc_provider_name,
+      oidc_logo_url: oidc_logo_url,
+      oidc_enabled: oidc_enabled
+    )
   end
 
   # def create(conn, %{"user" => %{"email" => email}} = _user_params) do
