@@ -28,8 +28,8 @@ defmodule Claper.Accounts.Oidc.User do
     field :issuer, :string
     field :provider, :string
     field :id_token, :string
-    field :refresh_token, :string
-    field :access_token, :string
+    field :refresh_token, :string, redact: true
+    field :access_token, :string, redact: true
     field :expires_at, :naive_datetime
     field :photo_url, :string
     field :groups, {:array, :string}

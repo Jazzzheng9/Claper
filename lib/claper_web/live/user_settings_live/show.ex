@@ -33,7 +33,11 @@ defmodule ClaperWeb.UserSettingsLive.Show do
      |> assign(:preferences_changeset, preferences_changeset)
      |> assign(:is_external_user, oidc_accounts != [] or lti_accounts != [])
      |> assign(:oidc_accounts, oidc_accounts)
-     |> assign(:lti_accounts, lti_accounts)}
+     |> assign(:lti_accounts, lti_accounts)
+     |> assign(
+       :allow_unlink_external_provider,
+       Application.get_env(:claper, :allow_unlink_external_provider)
+     )}
   end
 
   @impl true
@@ -59,11 +63,32 @@ defmodule ClaperWeb.UserSettingsLive.Show do
     )
   end
 
+  defp apply_action(socket, :set_password, _params) do
+    socket
+    |> assign(:page_title, gettext("Set a new password"))
+    |> assign(
+      :page_description,
+      gettext("Set a new password for your account before unlinking it.")
+    )
+  end
+
   defp apply_action(socket, :show, _params) do
     socket
     |> assign(:page_title, gettext("Settings"))
   end
 
+  @impl true
+  def handle_event(
+        "unlink",
+        _params,
+        socket
+      )
+      when length(socket.assigns.oidc_accounts) + length(socket.assigns.lti_accounts) == 1 and
+             socket.assigns.current_user.is_randomized_password do
+    {:noreply, socket |> redirect(to: ~p"/users/settings/set/password")}
+  end
+
+  @impl true
   def handle_event(
         "unlink",
         %{"issuer" => issuer} = _params,
@@ -77,6 +102,7 @@ defmodule ClaperWeb.UserSettingsLive.Show do
      |> push_navigate(to: ~p"/users/settings")}
   end
 
+  @impl true
   def handle_event(
         "unlink",
         %{"registration_id" => registration_id} = _params,
@@ -160,6 +186,27 @@ defmodule ClaperWeb.UserSettingsLive.Show do
       end
     else
       {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("save", %{"action" => "set_password"} = params, socket) do
+    %{"user" => user_params} = params
+
+    user = socket.assigns.current_user
+
+    case Accounts.set_user_password(user, user_params) do
+      {:ok, _applied_user} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :info,
+           gettext("Your password has been set, you can now unlink your account.")
+         )
+         |> redirect(to: ~p"/users/settings")}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :password_changeset, changeset)}
     end
   end
 

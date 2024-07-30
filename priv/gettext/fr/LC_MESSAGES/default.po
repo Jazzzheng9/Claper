@@ -9,7 +9,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #: lib/claper_web/live/event_live/manage.html.heex:1349
-#: lib/claper_web/live/user_settings_live/show.ex:90
+#: lib/claper_web/live/user_settings_live/show.ex:77
 #, elixir-autogen, elixir-format
 msgid "Settings"
 msgstr "Paramètres"
@@ -36,8 +36,8 @@ msgstr "Rejoignez l'expérience Claper"
 msgid "Oops, check that all fields are filled in correctly."
 msgstr "Oups, vérifiez que tous les champs sont remplis correctement."
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:112
-#: lib/claper_web/live/user_settings_live/show.html.heex:127
+#: lib/claper_web/live/user_settings_live/show.html.heex:155
+#: lib/claper_web/live/user_settings_live/show.html.heex:170
 #, elixir-autogen, elixir-format
 msgid "Change"
 msgstr "Changer"
@@ -47,7 +47,7 @@ msgstr "Changer"
 msgid "Code"
 msgstr "Code"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:103
+#: lib/claper_web/live/user_settings_live/show.html.heex:146
 #, elixir-autogen, elixir-format
 msgid "Email address"
 msgstr "Adresse email"
@@ -57,7 +57,7 @@ msgstr "Adresse email"
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:93
+#: lib/claper_web/live/user_settings_live/show.html.heex:136
 #, elixir-autogen, elixir-format
 msgid "Personal informations"
 msgstr "Informations personnelles"
@@ -210,21 +210,22 @@ msgstr "Supprimer"
 #: lib/claper_web/live/poll_live/form_component.html.heex:95
 #: lib/claper_web/live/user_settings_live/show.html.heex:38
 #: lib/claper_web/live/user_settings_live/show.html.heex:80
+#: lib/claper_web/live/user_settings_live/show.html.heex:123
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: lib/claper_web/live/user_settings_live/show.ex:111
+#: lib/claper_web/live/user_settings_live/show.ex:137
 #, elixir-autogen, elixir-format
 msgid "A link to confirm your email change has been sent to the new address."
 msgstr "Un lien pour confirmer votre changement d'email a été envoyé à la nouvelle adresse."
 
-#: lib/claper_web/live/user_settings_live/show.ex:49
+#: lib/claper_web/live/user_settings_live/show.ex:53
 #, elixir-autogen, elixir-format
 msgid "Change the email address you want associated with your account."
 msgstr "Modifiez l'email que vous souhaitez associer à votre compte."
 
-#: lib/claper_web/live/user_settings_live/show.ex:46
+#: lib/claper_web/live/user_settings_live/show.ex:50
 #, elixir-autogen, elixir-format
 msgid "Update your email"
 msgstr "Changer votre email"
@@ -633,7 +634,7 @@ msgstr "Ou utilisez le code:"
 msgid "Create account"
 msgstr "Créer un compte"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:118
+#: lib/claper_web/live/user_settings_live/show.html.heex:161
 #: lib/claper_web/templates/user_registration/new.html.heex:37
 #: lib/claper_web/templates/user_reset_password/edit.html.heex:34
 #: lib/claper_web/templates/user_session/new.html.heex:51
@@ -651,7 +652,7 @@ msgstr "Adresse email"
 msgid "Your password"
 msgstr "Votre mot de passe"
 
-#: lib/claper_web/live/user_settings_live/show.ex:58
+#: lib/claper_web/live/user_settings_live/show.ex:62
 #, elixir-autogen, elixir-format
 msgid "Change the password used to access your account."
 msgstr "Changez le mot de passe utilisé pour accéder à votre compte."
@@ -662,16 +663,17 @@ msgid "Current password"
 msgstr "Mot de passe actuel"
 
 #: lib/claper_web/live/user_settings_live/show.html.heex:76
+#: lib/claper_web/live/user_settings_live/show.html.heex:112
 #, elixir-autogen, elixir-format, fuzzy
 msgid "New password"
 msgstr "Nouveau mot de passe"
 
-#: lib/claper_web/live/user_settings_live/show.ex:55
+#: lib/claper_web/live/user_settings_live/show.ex:59
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Update your password"
 msgstr "Changer votre email"
 
-#: lib/claper_web/live/user_settings_live/show.ex:133
+#: lib/claper_web/live/user_settings_live/show.ex:159
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Your password has been updated."
 msgstr "Votre mot de passe a été mis à jour."
@@ -1042,7 +1044,7 @@ msgstr "Enregistré"
 msgid "Access"
 msgstr "Accès"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:230
+#: lib/claper_web/live/user_settings_live/show.html.heex:264
 #, elixir-autogen, elixir-format
 msgid "All your events and files will be permanently deleted, are you sure?"
 msgstr "Tous vos événements et fichiers seront définitivement supprimés, êtes-vous sûr ?"
@@ -1057,17 +1059,17 @@ msgstr "Êtes-vous sûr de vouloir terminer cet événement ? Cette action est i
 msgid "Attendees room"
 msgstr "Salle des participants"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:222
+#: lib/claper_web/live/user_settings_live/show.html.heex:256
 #, elixir-autogen, elixir-format
 msgid "Be careful, these actions are irreversible"
 msgstr "Soyez prudent, ces actions sont irréversibles"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:219
+#: lib/claper_web/live/user_settings_live/show.html.heex:253
 #, elixir-autogen, elixir-format
 msgid "Danger zone"
 msgstr "Zone de danger"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:235
+#: lib/claper_web/live/user_settings_live/show.html.heex:269
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Delete account"
 msgstr "Supprimer le compte"
@@ -1087,7 +1089,7 @@ msgstr "Terminer"
 msgid "View report"
 msgstr "Voir le rapport"
 
-#: lib/claper_web/live/user_settings_live/show.ex:172
+#: lib/claper_web/live/user_settings_live/show.ex:219
 #, elixir-autogen, elixir-format
 msgid "Your account has been deleted."
 msgstr "Votre compte a été supprimé."
@@ -1302,22 +1304,22 @@ msgstr "Créez votre prochaine présentation avec"
 msgid "Event doesn't exist"
 msgstr "L'événement n'existe pas"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:190
+#: lib/claper_web/live/user_settings_live/show.html.heex:223
 #, elixir-autogen, elixir-format
 msgid "Customize your account"
 msgstr "Personnalisez votre compte"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:209
+#: lib/claper_web/live/user_settings_live/show.html.heex:243
 #, elixir-autogen, elixir-format
 msgid "Language"
 msgstr "Langue"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:187
+#: lib/claper_web/live/user_settings_live/show.html.heex:220
 #, elixir-autogen, elixir-format
 msgid "Preferences"
 msgstr "Préférences"
 
-#: lib/claper_web/live/user_settings_live/show.ex:154
+#: lib/claper_web/live/user_settings_live/show.ex:180
 #, elixir-autogen, elixir-format
 msgid "Your preferences have been updated."
 msgstr "Vos préférences ont été mises à jour."
@@ -1363,7 +1365,7 @@ msgstr "Documentation"
 msgid "My account"
 msgstr "Mon compte"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:96
+#: lib/claper_web/live/user_settings_live/show.html.heex:139
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Your personal informations to access your account"
 msgstr "Vos informations personnelles pour accéder à votre compte"
@@ -1490,30 +1492,24 @@ msgstr "Afficher les résultats pour les participants"
 msgid "This slide does not have any interactions."
 msgstr "Cette diapositive n'a pas d'interactions."
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:133
+#: lib/claper_web/live/user_settings_live/show.html.heex:176
 #, elixir-autogen, elixir-format
 msgid "Accounts linked"
 msgstr "Comptes liés"
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:148
-#: lib/claper_web/live/user_settings_live/show.html.heex:171
+#: lib/claper_web/live/user_settings_live/show.html.heex:187
+#: lib/claper_web/live/user_settings_live/show.html.heex:205
 #, elixir-autogen, elixir-format
 msgid "Are you sure you want to unlink this account?"
 msgstr "Êtes-vous sûr de vouloir délier ce compte ?"
-
-#: lib/claper_web/live/user_settings_live/show.html.heex:144
-#: lib/claper_web/live/user_settings_live/show.html.heex:167
-#, elixir-autogen, elixir-format
-msgid "Are you sure you want to unlink this account? You will need to logout and ask for a new password to access your account again if you never had a password."
-msgstr "Êtes-vous sûr de vouloir délier ce compte ? Vous devrez vous déconnecter et demander un nouveau mot de passe pour accéder à nouveau à votre compte si vous n'avez jamais eu de mot de passe."
 
 #: lib/claper_web/templates/user_session/new.html.heex:72
 #, elixir-autogen, elixir-format
 msgid "Login with %{provider}"
 msgstr "Se connecter avec %{provider}"
 
-#: lib/claper_web/live/user_settings_live/show.ex:71
-#: lib/claper_web/live/user_settings_live/show.ex:84
+#: lib/claper_web/live/user_settings_live/show.ex:101
+#: lib/claper_web/live/user_settings_live/show.ex:115
 #, elixir-autogen, elixir-format
 msgid "The account has been unlinked."
 msgstr "Le compte a été délié."
@@ -1523,8 +1519,8 @@ msgstr "Le compte a été délié."
 msgid "This section contains all your interactions."
 msgstr "Cette section contient toutes vos interactions."
 
-#: lib/claper_web/live/user_settings_live/show.html.heex:153
-#: lib/claper_web/live/user_settings_live/show.html.heex:176
+#: lib/claper_web/live/user_settings_live/show.html.heex:190
+#: lib/claper_web/live/user_settings_live/show.html.heex:208
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Unlink"
 msgstr "Délier"
@@ -1538,3 +1534,23 @@ msgstr "Vous pouvez ajouter des interactions à vos diapositives de présentatio
 #, elixir-autogen, elixir-format
 msgid "Your interactions"
 msgstr "Vos interactions"
+
+#: lib/claper_web/live/user_settings_live/show.html.heex:119
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Confirm password"
+msgstr "Confirmer le nouveau mot de passe"
+
+#: lib/claper_web/live/user_settings_live/show.ex:68
+#, elixir-autogen, elixir-format
+msgid "Set a new password"
+msgstr "Définir un nouveau mot de passe"
+
+#: lib/claper_web/live/user_settings_live/show.ex:71
+#, elixir-autogen, elixir-format
+msgid "Set a new password for your account before unlinking it."
+msgstr "Définissez un nouveau mot de passe pour votre compte avant de le délier."
+
+#: lib/claper_web/live/user_settings_live/show.ex:204
+#, elixir-autogen, elixir-format
+msgid "Your password has been set, you can now unlink your account."
+msgstr "Votre mot de passe a été défini, vous pouvez maintenant délier votre compte."

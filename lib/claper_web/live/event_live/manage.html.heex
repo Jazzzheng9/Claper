@@ -31,7 +31,7 @@
   </div>
   <div
     id="settings-modal"
-    class={"#{if !@settings_modal, do: 'hidden' } fixed z-30 inset-0 overflow-y-auto p-4 sm:p-6 md:p-24
+    class={"#{if !@settings_modal, do: "hidden" } fixed z-30 inset-0 overflow-y-auto p-4 sm:p-6 md:p-24
     transform transition-all duration-150"}
     role="dialog"
     aria-modal="true"
@@ -107,7 +107,7 @@
 
   <div
     id="add-modal"
-    class={"#{if !@create, do: 'hidden' } fixed z-30 inset-0 overflow-y-auto p-4 sm:p-6 md:p-24
+    class={"#{if !@create, do: "hidden" } fixed z-30 inset-0 overflow-y-auto p-4 sm:p-6 md:p-24
     transform transition-all duration-150"}
     role="dialog"
     aria-modal="true"
@@ -607,11 +607,11 @@
     </div>
 
     <div
-      phx-hook={"#{if @event.presentation_file.length > 0, do: 'Split', else: ''}"}
+      phx-hook={"#{if @event.presentation_file.length > 0, do: "Split", else: ""}"}
       data-type="row"
       data-gutter=".gutter"
       id="base-layout"
-      class={"#{if @event.presentation_file.length > 0, do: 'md:grid grid-rows-[1fr_10px_1fr] overflow-y-auto', else: ''}"}
+      class={"#{if @event.presentation_file.length > 0, do: "md:grid grid-rows-[1fr_10px_1fr] overflow-y-auto", else: ""}"}
     >
       <div
         :if={@event.presentation_file.length > 0}
@@ -627,7 +627,7 @@
           >
             <%= if Application.get_env(:claper, :presentations) |> Keyword.get(:storage) == "local" do %>
               <img
-                class={"#{if @state.position==index, do: 'border-4 border-primary-500' , else: 'opacity-20' }
+                class={"#{if @state.position==index, do: "border-4 border-primary-500" , else: "opacity-20" }
                     transition-all object-contain"}
                 src={"/uploads/#{@event.presentation_file.hash}/#{index+1}.jpg"}
               />
@@ -1055,32 +1055,32 @@
               phx-update="replace"
               class="flex flex-col md:flex-row md:flex items-center bg-gray-200 space-y-2 md:space-y-0 space-x-0 md:space-x-3 px-2 w-full py-3"
             >
-              <li class={"rounded-md #{if @list_tab==:posts, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+              <li class={"rounded-md #{if @list_tab==:posts, do: "bg-secondary-600 text-white" ,
+                else: "bg-white text-gray-600" } px-2 py-0.5 text-sm shadow-sm"}>
                 <%= link(gettext("Messages") <> " (#{@post_count})",
                   to: "#",
                   phx_click: "list-tab",
                   phx_value_tab: :posts
                 ) %>
               </li>
-              <li class={"rounded-md #{if @list_tab==:questions, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+              <li class={"rounded-md #{if @list_tab==:questions, do: "bg-secondary-600 text-white" ,
+                else: "bg-white text-gray-600" } px-2 py-0.5 text-sm shadow-sm"}>
                 <%= link(gettext("Questions") <> " (#{@question_count})",
                   to: "#",
                   phx_click: "list-tab",
                   phx_value_tab: :questions
                 ) %>
               </li>
-              <li class={"rounded-md #{if @list_tab==:pinned_posts, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+              <li class={"rounded-md #{if @list_tab==:pinned_posts, do: "bg-secondary-600 text-white" ,
+                else: "bg-white text-gray-600" } px-2 py-0.5 text-sm shadow-sm"}>
                 <%= link(gettext("Pinned messages") <> " (#{@pinned_post_count})",
                   to: "#",
                   phx_click: "list-tab",
                   phx_value_tab: :pinned_posts
                 ) %>
               </li>
-              <li class={"rounded-md #{if @list_tab==:forms, do: 'bg-secondary-600 text-white' ,
-                else: 'bg-white text-gray-600' } px-2 py-0.5 text-sm shadow-sm"}>
+              <li class={"rounded-md #{if @list_tab==:forms, do: "bg-secondary-600 text-white" ,
+                else: "bg-white text-gray-600" } px-2 py-0.5 text-sm shadow-sm"}>
                 <%= link(gettext("Form submissions") <> " (#{@form_submit_count})",
                   to: "#",
                   phx_click: "list-tab",

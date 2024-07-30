@@ -56,6 +56,7 @@ defmodule Claper.Accounts do
         create_user(%{
           email: email,
           confirmed_at: DateTime.utc_now(),
+          is_randomized_password: true,
           password: :crypto.strong_rand_bytes(32)
         })
 
@@ -225,6 +226,24 @@ defmodule Claper.Accounts do
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Sets the user password.
+  ## Examples
+      iex> set_user_password(user, %{password: ...})
+      {:ok, %User{}}
+      iex> set_user_password(user, %{password: ...})
+      {:error, %Ecto.Changeset{}}
+  """
+  def set_user_password(user, attrs) do
+    user
+    |> User.password_changeset(attrs |> Map.put("is_randomized_password", false))
+    |> Repo.update()
+    |> case do
+      {:ok, user} -> {:ok, user}
+      {:error, changeset} -> {:error, changeset}
     end
   end
 
@@ -523,7 +542,7 @@ defmodule Claper.Accounts do
       ) do
     case get_oidc_user_by_sub(sub) do
       nil -> create_new_user(attrs)
-      %Accounts.Oidc.User{} = user -> {:ok, user |> Repo.preload(:user)}
+      %Accounts.Oidc.User{} = user -> update_oidc_user(user, attrs)
     end
   end
 
@@ -535,6 +554,16 @@ defmodule Claper.Accounts do
       {:ok, user |> Repo.preload(:user)}
     else
       _ -> {:error, %{reason: :invalid_user, msg: "Invalid Claper user"}}
+    end
+  end
+
+  defp update_oidc_user(user, attrs) do
+    user
+    |> Accounts.Oidc.User.changeset(attrs)
+    |> Repo.update()
+    |> case do
+      {:ok, user} -> {:ok, user |> Repo.preload(:user)}
+      {:error, changeset} -> {:error, changeset}
     end
   end
 end

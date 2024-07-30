@@ -37,17 +37,16 @@ defmodule ClaperWeb.UserOidcAuth do
              opts()
            ),
          {:ok, oidc_user} <- validate_user(id_token, access_token, refresh_token, claims) do
-      UserAuth.log_in_user(conn, oidc_user.user)
-
       conn
-      |> put_flash(:info, "Authenticated successfully.")
-      |> redirect(to: ~p"/")
+      |> UserAuth.log_in_user(oidc_user.user)
     else
       {:error, _} ->
         conn
         |> put_flash(:error, "Cannot authenticate user.")
         |> redirect(to: ~p"/users/log_in")
     end
+
+    conn
   end
 
   defp config do
@@ -70,16 +69,29 @@ defmodule ClaperWeb.UserOidcAuth do
     config()[:scopes]
   end
 
-  defp property_mappings do
-    config()[:property_mappings]
+  defp base_url do
+    Application.get_env(:claper, ClaperWeb.Endpoint)[:base_url]
   end
 
   defp opts() do
-    %{redirect_uri: "http://localhost:4000/users/oidc/callback", scopes: scopes()}
+    url = base_url()
+
+    %{
+      redirect_uri: "#{url}/users/oidc/callback",
+      scopes: scopes()
+    }
+  end
+
+  defp format_refresh_token(%Oidcc.Token.Refresh{token: token}) do
+    token
+  end
+
+  defp format_refresh_token(:none) do
+    ""
   end
 
   defp validate_user(id_token, access_token, refresh_token, claims) do
-    mappings = property_mappings()
+    mappings = config()[:property_mappings]
 
     case Claper.Accounts.get_or_create_user_with_oidc(%{
            sub: claims["sub"],
@@ -90,7 +102,7 @@ defmodule ClaperWeb.UserOidcAuth do
            expires_at: claims["exp"] |> DateTime.from_unix!() |> DateTime.to_naive(),
            id_token: id_token,
            access_token: access_token,
-           refresh_token: to_string(refresh_token),
+           refresh_token: format_refresh_token(refresh_token),
            groups: claims["groups"],
            roles: claims[mappings["roles"]],
            organization: claims[mappings["organization"]],

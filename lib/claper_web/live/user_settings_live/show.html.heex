@@ -87,6 +87,49 @@
       </.live_component>
     <% end %>
 
+    <%= if @live_action in [:set_password] do %>
+      <.live_component
+        module={ClaperWeb.ModalComponent}
+        class="hidden"
+        id="modal-wrapper"
+        title={@page_title}
+        description={@page_description}
+        return_to={~p"/users/settings"}
+      >
+        <div>
+          <.form
+            :let={f}
+            for={@password_changeset}
+            phx-submit="save"
+            id="set_password"
+            class="mt-5 md:flex md:items-end gap-x-2"
+          >
+            <%= hidden_input(f, :action, name: "action", value: "set_password") %>
+
+            <ClaperWeb.Component.Input.password
+              form={f}
+              key={:password}
+              name={gettext("New password")}
+              required="true"
+            />
+
+            <ClaperWeb.Component.Input.password
+              form={f}
+              key={:password_confirmation}
+              name={gettext("Confirm password")}
+              required="true"
+            />
+
+            <%= submit(gettext("Save"),
+              phx_disable_with: "Saving...",
+              class:
+                "mt-2 w-full h-14 inline-flex transition-all items-center justify-center px-4 py-2 shadow-sm font-medium rounded-md text-white bg-black hover:bg-primary-500 md:mt-0 md:ml-3 md:w-auto md:text-sm"
+            ) %>
+          </.form>
+        </div>
+      </.live_component>
+    <% end %>
+
     <div class="shadow overflow-hidden sm:rounded-lg">
       <div class="py-5">
         <h3 class="text-lg leading-6 font-medium text-gray-900">
@@ -132,52 +175,42 @@
             <dt :if={@is_external_user} class="text-sm font-medium text-gray-500">
               <%= gettext("Accounts linked") %>
             </dt>
-            <%= for account <- @oidc_accounts do %>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <span class="flex-grow"><%= account.provider %></span>
-                <span class="ml-4 flex-shrink-0">
-                  <button
-                    phx-click="unlink"
-                    phx-value-issuer={account.issuer}
-                    data-confirm={
-                      if length(@oidc_accounts) + length(@lti_accounts) == 1 do
-                        gettext(
-                          "Are you sure you want to unlink this account? You will need to logout and ask for a new password to access your account again if you never had a password."
-                        )
-                      else
-                        gettext("Are you sure you want to unlink this account?")
-                      end
-                    }
-                    class="rounded-md font-medium text-purple-600 hover:text-purple-500"
-                  >
-                    <%= gettext("Unlink") %>
-                  </button>
-                </span>
-              </dd>
-            <% end %>
-            <%= for account <- @lti_accounts do %>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <span class="flex-grow">LMS (#<%= account.registration_id %>)</span>
-                <span class="ml-4 flex-shrink-0">
-                  <button
-                    phx-click="unlink"
-                    phx-value-registration_id={account.registration_id}
-                    data-confirm={
-                      if length(@oidc_accounts) + length(@lti_accounts) == 1 do
-                        gettext(
-                          "Are you sure you want to unlink this account? You will need to logout and ask for a new password to access your account again if you never had a password."
-                        )
-                      else
-                        gettext("Are you sure you want to unlink this account?")
-                      end
-                    }
-                    class="rounded-md font-medium text-purple-600 hover:text-purple-500"
-                  >
-                    <%= gettext("Unlink") %>
-                  </button>
-                </span>
-              </dd>
-            <% end %>
+            <dd class="text-sm text-gray-900 sm:col-span-2">
+              <%= for account <- @oidc_accounts do %>
+                <div class="text-sm text-gray-900 bg-white rounded-md py-2 px-4 shadow-base flex gap-x-2 items-center justify-start mt-2 sm:mt-0 mb-2">
+                  <img src="/images/icons/openid.png" class="w-5" />
+                  <span class="flex-grow"><%= account.provider %></span>
+                  <span :if={@allow_unlink_external_provider}>
+                    <button
+                      phx-click="unlink"
+                      phx-value-issuer={account.issuer}
+                      data-confirm={gettext("Are you sure you want to unlink this account?")}
+                      class="font-medium text-red-600 hover:text-red-500"
+                    >
+                      <%= gettext("Unlink") %>
+                    </button>
+                  </span>
+                </div>
+              <% end %>
+              <%= for account <- @lti_accounts do %>
+                <div class="text-sm text-gray-900 bg-white rounded-md py-2 px-4 shadow-base flex gap-x-2 items-center justify-start mb-2">
+                  <img src="/images/icons/lms.png" class="w-8" />
+                  <span class="flex-grow">
+                    LMS <span class="text-gray-500 text-xs">#<%= account.registration_id %></span>
+                  </span>
+                  <span :if={@allow_unlink_external_provider} class="ml-4 flex-shrink-0">
+                    <button
+                      phx-click="unlink"
+                      phx-value-registration_id={account.registration_id}
+                      data-confirm={gettext("Are you sure you want to unlink this account?")}
+                      class="font-medium text-red-600 hover:text-red-500"
+                    >
+                      <%= gettext("Unlink") %>
+                    </button>
+                  </span>
+                </div>
+              <% end %>
+            </dd>
           </div>
         </dl>
       </div>
@@ -198,6 +231,7 @@
                 <ClaperWeb.Component.Input.select
                   form={f}
                   fieldClass="!w-auto"
+                  labelClass="text-sm font-medium text-gray-500"
                   array={[
                     {"Deutsch", "de"},
                     {"English", "en"},

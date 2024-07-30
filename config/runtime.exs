@@ -41,7 +41,6 @@ case secret_key_base do
     nil
 end
 
-site_url = get_var_from_path_or_env(config_dir, "SITE_URL", "http://localhost:4000")
 base_url = get_var_from_path_or_env(config_dir, "BASE_URL")
 
 if !base_url do
@@ -86,8 +85,6 @@ oidc_issuer = get_var_from_path_or_env(config_dir, "OIDC_ISSUER", "https://accou
 
 oidc_client_id = get_var_from_path_or_env(config_dir, "OIDC_CLIENT_ID", nil)
 oidc_client_secret = get_var_from_path_or_env(config_dir, "OIDC_CLIENT_SECRET", nil)
-oidc_redirect_uri = get_var_from_path_or_env(config_dir, "OIDC_REDIRECT_URI", nil)
-oidc_response_type = get_var_from_path_or_env(config_dir, "OIDC_RESPONSE_TYPE", "code")
 oidc_scopes = get_var_from_path_or_env(config_dir, "OIDC_SCOPES", "openid email profile")
 oidc_provider_name = get_var_from_path_or_env(config_dir, "OIDC_PROVIDER_NAME", "OpenID Connect")
 oidc_logo_url = get_var_from_path_or_env(config_dir, "OIDC_LOGO_URL", "/images/icons/openid.png")
@@ -105,15 +102,17 @@ oidc_property_mappings =
   end
 
 oidc_enabled =
-  !is_nil(oidc_client_id) and !is_nil(oidc_client_secret) and !is_nil(oidc_redirect_uri)
+  !is_nil(oidc_client_id) and !is_nil(oidc_client_secret)
+
+allow_unlink_external_provider =
+  get_var_from_path_or_env(config_dir, "ALLOW_UNLINK_EXTERNAL_PROVIDER", "true")
+  |> String.to_existing_atom()
 
 config :claper, :oidc,
   enabled: oidc_enabled,
   issuer: oidc_issuer,
   client_id: oidc_client_id,
   client_secret: oidc_client_secret,
-  redirect_uri: oidc_redirect_uri,
-  response_type: oidc_response_type,
   scopes: String.split(oidc_scopes, " "),
   provider_name: oidc_provider_name,
   logo_url: oidc_logo_url,
@@ -131,6 +130,7 @@ config :claper, Claper.Repo,
 
 config :claper, ClaperWeb.Endpoint,
   url: [scheme: base_url.scheme, host: base_url.host, path: base_url.path, port: base_url.port],
+  base_url: base_url,
   http: [
     ip: listen_ip,
     port: port,
@@ -142,7 +142,8 @@ config :claper, ClaperWeb.Endpoint,
   secure_cookie: secure_cookie
 
 config :claper,
-  enable_account_creation: enable_account_creation
+  enable_account_creation: enable_account_creation,
+  allow_unlink_external_provider: allow_unlink_external_provider
 
 config :claper, :presentations,
   max_file_size: max_file_size,
