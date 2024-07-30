@@ -89,6 +89,10 @@ oidc_scopes = get_var_from_path_or_env(config_dir, "OIDC_SCOPES", "openid email 
 oidc_provider_name = get_var_from_path_or_env(config_dir, "OIDC_PROVIDER_NAME", "OpenID Connect")
 oidc_logo_url = get_var_from_path_or_env(config_dir, "OIDC_LOGO_URL", "/images/icons/openid.png")
 
+oidc_auto_redirect_login =
+  get_var_from_path_or_env(config_dir, "OIDC_AUTO_REDIRECT_LOGIN", "false")
+  |> String.to_existing_atom()
+
 oidc_property_mappings =
   get_var_from_path_or_env(config_dir, "OIDC_PROPERTY_MAPPINGS", nil)
   |> case do
@@ -108,6 +112,8 @@ allow_unlink_external_provider =
   get_var_from_path_or_env(config_dir, "ALLOW_UNLINK_EXTERNAL_PROVIDER", "true")
   |> String.to_existing_atom()
 
+logout_redirect_url = get_var_from_path_or_env(config_dir, "LOGOUT_REDIRECT_URL", nil)
+
 config :claper, :oidc,
   enabled: oidc_enabled,
   issuer: oidc_issuer,
@@ -116,7 +122,8 @@ config :claper, :oidc,
   scopes: String.split(oidc_scopes, " "),
   provider_name: oidc_provider_name,
   logo_url: oidc_logo_url,
-  property_mappings: oidc_property_mappings
+  property_mappings: oidc_property_mappings,
+  auto_redirect_login: oidc_auto_redirect_login
 
 config :claper, Claper.Repo,
   url: database_url,
@@ -143,7 +150,8 @@ config :claper, ClaperWeb.Endpoint,
 
 config :claper,
   enable_account_creation: enable_account_creation,
-  allow_unlink_external_provider: allow_unlink_external_provider
+  allow_unlink_external_provider: allow_unlink_external_provider,
+  logout_redirect_url: logout_redirect_url
 
 config :claper, :presentations,
   max_file_size: max_file_size,

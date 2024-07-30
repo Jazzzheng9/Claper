@@ -5,6 +5,17 @@ defmodule ClaperWeb.UserSessionController do
   alias ClaperWeb.UserAuth
 
   def new(conn, _params) do
+    oidc_auto_redirect_login = Application.get_env(:claper, :oidc)[:auto_redirect_login]
+
+    conn
+    |> redirect_to_login(oidc_auto_redirect_login)
+  end
+
+  defp redirect_to_login(conn, true) do
+    conn |> redirect(to: "/users/oidc")
+  end
+
+  defp redirect_to_login(conn, false) do
     oidc_provider_name = Application.get_env(:claper, :oidc)[:provider_name]
     oidc_logo_url = Application.get_env(:claper, :oidc)[:logo_url]
     oidc_enabled = Application.get_env(:claper, :oidc)[:enabled]

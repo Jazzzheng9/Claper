@@ -310,7 +310,7 @@ defmodule ClaperWeb.EventLive.Show do
   end
 
   @impl true
-  def handle_info({:embed_deleted, %Claper.Embeds.Embed{enabled: true} = embed}, socket) do
+  def handle_info({:embed_deleted, %Claper.Embeds.Embed{enabled: true}}, socket) do
     {:noreply,
      socket
      |> update(:current_embed, fn _current_embed -> nil end)}
