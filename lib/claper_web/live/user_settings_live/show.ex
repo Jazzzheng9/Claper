@@ -59,6 +59,11 @@ defmodule ClaperWeb.UserSettingsLive.Show do
     )
   end
 
+  defp apply_action(socket, :show, _params) do
+    socket
+    |> assign(:page_title, gettext("Settings"))
+  end
+
   def handle_event(
         "unlink",
         %{"issuer" => issuer} = _params,
@@ -83,11 +88,6 @@ defmodule ClaperWeb.UserSettingsLive.Show do
      socket
      |> put_flash(:info, gettext("The account has been unlinked."))
      |> push_navigate(to: ~p"/users/settings")}
-  end
-
-  defp apply_action(socket, :show, _params) do
-    socket
-    |> assign(:page_title, gettext("Settings"))
   end
 
   @impl true

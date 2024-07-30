@@ -121,11 +121,11 @@ defmodule ClaperWeb.Component.Input do
       </span>
       <span
         aria-hidden="true"
-        class={"#{if @checked, do: 'bg-primary-500', else: 'bg-gray-200'} pointer-events-none absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out"}
+        class={"#{if @checked, do: "bg-primary-500", else: "bg-gray-200"} pointer-events-none absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out"}
       >
       </span>
       <span
-        class={"#{if @checked, do: 'translate-x-5', else: 'translate-x-0'} pointer-events-none absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow ring-0 transition-transform duration-200 ease-in-out"}
+        class={"#{if @checked, do: "translate-x-5", else: "translate-x-0"} pointer-events-none absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 bg-white shadow ring-0 transition-transform duration-200 ease-in-out"}
         aria-hidden="true"
       >
       </span>
