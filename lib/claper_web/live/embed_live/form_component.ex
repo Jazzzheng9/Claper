@@ -12,6 +12,12 @@ defmodule ClaperWeb.EmbedLive.FormComponent do
      |> assign(assigns)
      |> assign_new(:dark, fn -> false end)
      |> assign(:embeds, list_embeds(assigns))
+     |> assign(:providers, [
+       {"YouTube", "youtube"},
+       {"Vimeo", "vimeo"},
+       {"Canva", "canva"},
+       {"Custom (iframe)", "custom"}
+     ])
      |> assign(:changeset, changeset)}
   end
 

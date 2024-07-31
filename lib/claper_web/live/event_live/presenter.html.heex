@@ -198,7 +198,12 @@
       <%= if @current_embed do %>
         <!-- EMBED -->
         <div id="embed" class="max-h-screen w-full h-screen">
-          <%= raw(@current_embed.content) %>
+          <.live_component
+            id="embed-component"
+            module={ClaperWeb.EventLive.EmbedIframeComponent}
+            provider={@current_embed.provider}
+            content={@current_embed.content}
+          />
         </div>
       <% end %>
       <div class={"#{if @current_embed, do: "hidden", else: ""} text-center"} id="slider">
