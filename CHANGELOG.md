@@ -1,9 +1,14 @@
-## v2.1.0
+## v3.0.0
 
 ### Features
 
-- LTI 1.3 support
+- LTI 1.3 integration (Beta)
+- OpenID Connect integration
 - New layout for presentation manager
+
+### Fixes and improvements
+
+- Improve embeds integration for better compatibility with different providers
 
 ## v2.0.1
 
