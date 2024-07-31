@@ -50,12 +50,12 @@ defmodule Claper.Embeds.Embed do
       :position,
       :attendee_visibility
     ])
-    |> validate_provider_url(attrs)
     |> validate_inclusion(:provider, ["youtube", "vimeo", "canva", "custom"])
+    |> validate_provider_url()
   end
 
-  defp validate_provider_url(changeset, attrs) do
-    case attrs["provider"] do
+  defp validate_provider_url(changeset) do
+    case get_field(changeset, :provider) do
       "youtube" ->
         changeset
         |> validate_format(:content, ~r/^https?:\/\/.+$/,
