@@ -5,6 +5,7 @@
 - LTI 1.3 integration (Beta)
 - OpenID Connect integration
 - New layout for presentation manager
+- Duplicate event feature
 
 ### Fixes and improvements
 

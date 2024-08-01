@@ -312,29 +312,6 @@ defmodule ClaperWeb.EventLive.Manage do
      |> interactions_at_position(page)}
   end
 
-  @impl true
-  def handle_event(
-        "import",
-        %{"event" => event_uuid},
-        %{assigns: %{current_user: current_user, event: current_event}} = socket
-      ) do
-    try do
-      case Claper.Events.import(current_user.id, event_uuid, current_event.uuid) do
-        {:ok, _event} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, gettext("Interactions imported successfully"))
-           |> redirect(to: ~p"/e/#{current_event.code}/manage")}
-      end
-    rescue
-      Ecto.NoResultsError ->
-        {:noreply,
-         socket
-         |> put_flash(:error, gettext("Interactions import failed"))
-         |> redirect(to: ~p"/e/#{current_event.code}/manage")}
-    end
-  end
-
   def handle_event("poll-set-active", %{"id" => id}, socket) do
     with poll <- Polls.get_poll!(id), :ok <- Claper.Interactions.enable_interaction(poll) do
       Phoenix.PubSub.broadcast(
