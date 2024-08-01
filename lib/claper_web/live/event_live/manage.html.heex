@@ -626,9 +626,13 @@
                 src={"/uploads/#{@event.presentation_file.hash}/#{index+1}.jpg"}
               />
             <% else %>
-              <img src={"https://#{Application.get_env(:claper, :presentations) |>
+              <img
+                class={"#{if @state.position==index, do: "border-4 border-primary-500" , else: "opacity-20" }
+                    transition-all object-contain"}
+                src={"https://#{Application.get_env(:claper, :presentations) |>
                           Keyword.get(:aws_bucket)}.s3.#{Application.get_env(:ex_aws,
-                          :region)}.amazonaws.com/presentations/#{@event.presentation_file.hash}/#{index+1}.jpg"} />
+                          :region)}.amazonaws.com/presentations/#{@event.presentation_file.hash}/#{index+1}.jpg"}
+              />
             <% end %>
           </button>
         <% end %>
