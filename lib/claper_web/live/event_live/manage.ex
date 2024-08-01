@@ -542,23 +542,6 @@ defmodule ClaperWeb.EventLive.Manage do
   @impl true
   def handle_event(
         "checked",
-        %{"key" => "show_poll_results_enabled", "value" => value},
-        %{assigns: %{state: state}} = socket
-      ) do
-    {:ok, new_state} =
-      Claper.Presentations.update_presentation_state(
-        state,
-        %{
-          :show_poll_results_enabled => value
-        }
-      )
-
-    {:noreply, socket |> assign(:state, new_state)}
-  end
-
-  @impl true
-  def handle_event(
-        "checked",
         %{"key" => "show_only_pinned", "value" => value},
         %{assigns: %{event: _event, state: state}} = socket
       ) do

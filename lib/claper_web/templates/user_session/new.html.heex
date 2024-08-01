@@ -32,25 +32,27 @@
               <ClaperWeb.Component.Alert.error message={@error_message} stick={true} />
             <% end %>
             <input type="hidden" name="remember" value="true" />
-            <ClaperWeb.Component.Input.email
-              form={f}
-              key={:email}
-              labelClass="text-white sr-only"
-              placeholder={gettext("Your email address")}
-              fieldClass="bg-gray-700 text-white"
-              name={gettext("Email")}
-              autofocus="true"
-              required="true"
-            />
-            <ClaperWeb.Component.Input.password
-              form={f}
-              key={:password}
-              labelClass="text-white sr-only"
-              placeholder={gettext("Your password")}
-              fieldClass="bg-gray-700 text-white"
-              name={gettext("Password")}
-              required="true"
-            />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <ClaperWeb.Component.Input.email
+                form={f}
+                key={:email}
+                labelClass="text-white sr-only"
+                placeholder={gettext("Email address")}
+                fieldClass="bg-gray-700 text-white"
+                name={gettext("Email")}
+                autofocus="true"
+                required="true"
+              />
+              <ClaperWeb.Component.Input.password
+                form={f}
+                key={:password}
+                labelClass="text-white sr-only"
+                placeholder={gettext("Password")}
+                fieldClass="bg-gray-700 text-white"
+                name={gettext("Password")}
+                required="true"
+              />
+            </div>
 
             <div class="pt-5">
               <button

@@ -9,6 +9,7 @@
 ### Fixes and improvements
 
 - Improve embeds integration for better compatibility with different providers
+- Add an option to polls to show results to attendees
 
 ## v2.0.1
 

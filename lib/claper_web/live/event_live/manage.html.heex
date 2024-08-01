@@ -749,49 +749,6 @@
                           </span>
                         </button>
                       </li>
-                      <li>
-                        <button
-                          phx-click="checked"
-                          phx-value-key="show_poll_results_enabled"
-                          value={"#{!@state.show_poll_results_enabled}"}
-                          class="py-2 px-2 rounded text-gray-600 bg-gray-100 hover:bg-gray-200 flex justify-center items-center w-full gap-x-3"
-                        >
-                          <svg
-                            :if={@state.show_poll_results_enabled}
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-6 w-6"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 4h10a2 2 0 0 1 2 2v10m-.586 3.414a2 2 0 0 1 -1.414 .586h-12a2 2 0 0 1 -2 -2v-12c0 -.547 .22 -1.043 .576 -1.405" /><path d="M7 14l3 -3l2 2l.5 -.5m2 -2l.5 -.5l2 2" /><path d="M3 3l18 18" />
-                          </svg>
-
-                          <svg
-                            :if={!@state.show_poll_results_enabled}
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-6 w-6"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 18v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M7 14l3 -3l2 2l3 -3l2 2" />
-                          </svg>
-
-                          <span :if={@state.show_poll_results_enabled}>
-                            <%= gettext("Hide results for attendees") %>
-                          </span>
-                          <span :if={!@state.show_poll_results_enabled}>
-                            <%= gettext("Show results for attendees") %>
-                          </span>
-                        </button>
-                      </li>
                     </ul>
                   </div>
                   <div>

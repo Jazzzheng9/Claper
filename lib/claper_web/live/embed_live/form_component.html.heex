@@ -46,12 +46,14 @@
         </div>
       </div>
 
+      <p class="text-gray-700 text-xl font-semibold mt-5"><%= gettext("Options") %></p>
+
       <div class="flex gap-x-2 mb-5 mt-3">
         <%= checkbox(f, :attendee_visibility, class: "h-4 w-5") %>
         <%= label(
           f,
           :attendee_visibility,
-          gettext("Attendee can view the web content on their device"),
+          gettext("Attendees can view the web content on their device"),
           class: "text-sm font-medium"
         ) %>
       </div>

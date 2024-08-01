@@ -179,7 +179,28 @@
               <%= for account <- @oidc_accounts do %>
                 <div class="text-sm text-gray-900 bg-white rounded-md py-2 px-4 shadow-base flex gap-x-2 items-center justify-start mt-2 sm:mt-0 mb-2">
                   <img src="/images/icons/openid.png" class="w-5" />
-                  <span class="flex-grow"><%= account.provider %></span>
+                  <span class="flex-grow flex items-center gap-x-2">
+                    <span><%= account.provider %></span>
+                    <div
+                      :if={account.organization}
+                      class="text-gray-500 text-xs flex items-center gap-x-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                        class="h-3"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M1.75 2a.75.75 0 0 0 0 1.5H2v9h-.25a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 .75.75v1.5c0 .414.336.75.75.75h.5a.75.75 0 0 0 .75-.75V3.5h.25a.75.75 0 0 0 0-1.5h-7.5ZM3.5 5.5A.5.5 0 0 1 4 5h.5a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5v-.5Zm.5 2a.5.5 0 0 0-.5.5v.5A.5.5 0 0 0 4 9h.5a.5.5 0 0 0 .5-.5V8a.5.5 0 0 0-.5-.5H4Zm2-2a.5.5 0 0 1 .5-.5H7a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-.5.5h-.5A.5.5 0 0 1 6 6v-.5Zm.5 2A.5.5 0 0 0 6 8v.5a.5.5 0 0 0 .5.5H7a.5.5 0 0 0 .5-.5V8a.5.5 0 0 0-.5-.5h-.5ZM11.5 6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.75a.75.75 0 0 0 0-1.5H14v-5h.25a.75.75 0 0 0 0-1.5H11.5Zm.5 1.5h.5a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5H12a.5.5 0 0 1-.5-.5V8a.5.5 0 0 1 .5-.5Zm0 2.5a.5.5 0 0 0-.5.5v.5a.5.5 0 0 0 .5.5h.5a.5.5 0 0 0 .5-.5v-.5a.5.5 0 0 0-.5-.5H12Z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+
+                      <span><%= account.organization %></span>
+                    </div>
+                  </span>
                   <span :if={@allow_unlink_external_provider}>
                     <button
                       phx-click="unlink"

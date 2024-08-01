@@ -176,7 +176,7 @@ defmodule ClaperWeb.Component.Input do
       <%= label(@form, @key, @name, class: "block text-sm font-medium text-gray-700") %>
       <div class="mt-1 relative">
         <img
-          class="icon absolute transition-all top-3 left-2 duration-100"
+          class="icon absolute transition-all top-2.5 left-2 duration-100 h-6"
           src="/images/icons/hashtag.svg"
           alt="code"
         />
@@ -187,7 +187,7 @@ defmodule ClaperWeb.Component.Input do
           autofocus: @autofocus,
           autocomplete: @key,
           class:
-            "read-only:opacity-50 outline-none shadow-base focus:ring-primary-500 focus:border-primary-500 block w-full text-lg border-gray-300 rounded-md py-2 pr-3 pl-12 uppercase"
+            "read-only:opacity-50 outline-none shadow-base focus:ring-primary-500 focus:border-primary-500 block w-full text-lg border-gray-300 rounded-md py-2 pr-3 pl-9 uppercase"
         ) %>
       </div>
       <%= if Keyword.has_key?(@form.errors, @key) do %>
@@ -216,7 +216,7 @@ defmodule ClaperWeb.Component.Input do
             placeholder: @placeholder,
             autocomplete: false,
             class:
-              "outline-none shadow-base focus:ring-primary-500 focus:border-primary-500 block w-full text-lg border-gray-300 rounded-md py-4 px-3 read-only:opacity-50"
+              "outline-none shadow-base focus:ring-primary-500 focus:border-primary-500 block w-full text-lg border-gray-300 rounded-md py-2 px-3 read-only:opacity-50"
           ) %>
         </div>
 
