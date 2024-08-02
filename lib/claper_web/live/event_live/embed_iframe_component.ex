@@ -30,6 +30,14 @@ defmodule ClaperWeb.EventLive.EmbedIframeComponent do
             allow="fullscreen"
           >
           </iframe>
+        <% "googleslides" -> %>
+          <iframe
+            src={"#{@content |> String.replace("/pub", "/embed")}"}
+            frameborder="0"
+            allowfullscreen="allowfullscreen"
+            allow="fullscreen"
+          >
+          </iframe>
         <% "custom" -> %>
           <%= raw(@content) %>
       <% end %>

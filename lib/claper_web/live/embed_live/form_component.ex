@@ -16,6 +16,7 @@ defmodule ClaperWeb.EmbedLive.FormComponent do
        {"YouTube", "youtube"},
        {"Vimeo", "vimeo"},
        {"Canva", "canva"},
+       {"Google Slides", "googleslides"},
        {"Custom (iframe)", "custom"}
      ])
      |> assign(:changeset, changeset)}

@@ -50,7 +50,7 @@ defmodule Claper.Embeds.Embed do
       :position,
       :attendee_visibility
     ])
-    |> validate_inclusion(:provider, ["youtube", "vimeo", "canva", "custom"])
+    |> validate_inclusion(:provider, ["youtube", "vimeo", "canva", "googleslides", "custom"])
     |> validate_provider_url()
   end
 
@@ -72,6 +72,15 @@ defmodule Claper.Embeds.Embed do
         )
         |> validate_format(:content, ~r/canva\.com/,
           message: gettext("Please enter a valid %{provider} link", provider: "Canva")
+        )
+
+      "googleslides" ->
+        changeset
+        |> validate_format(:content, ~r/^https?:\/\/.+$/,
+          message: gettext("Please enter a valid link starting with http:// or https://")
+        )
+        |> validate_format(:content, ~r/google\.com/,
+          message: gettext("Please enter a valid %{provider} link", provider: "Google Slides")
         )
 
       "vimeo" ->
