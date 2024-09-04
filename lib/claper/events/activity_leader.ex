@@ -38,7 +38,7 @@ defmodule Claper.Events.ActivityLeader do
       :user_email
     ])
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> validate_format(:email, ~r/^$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, min: 6, max: 160)
     |> unique_constraint(:email)
     |> validate_not_current_user_email

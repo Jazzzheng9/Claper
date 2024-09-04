@@ -21,12 +21,12 @@
             />
           <% end %>
           <input type="hidden" name="remember" value="true" />
-          <ClaperWeb.Component.Input.email
+          <ClaperWeb.Component.Input.text
             form={f}
             key={:email}
             labelClass="text-white"
             fieldClass="bg-gray-700 text-white"
-            name={gettext("Email")}
+            name={gettext("Username")}
             required="true"
           />
           <ClaperWeb.Component.Input.password

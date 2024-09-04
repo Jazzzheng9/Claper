@@ -33,13 +33,13 @@
             <% end %>
             <input type="hidden" name="remember" value="true" />
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <ClaperWeb.Component.Input.email
+              <ClaperWeb.Component.Input.text
                 form={f}
                 key={:email}
                 labelClass="text-white sr-only"
-                placeholder={gettext("Email address")}
+                placeholder={gettext("Username")}
                 fieldClass="bg-gray-700 text-white"
-                name={gettext("Email")}
+                name={gettext("Username")}
                 autofocus="true"
                 required="true"
               />
@@ -47,9 +47,9 @@
                 form={f}
                 key={:password}
                 labelClass="text-white sr-only"
-                placeholder={gettext("Password")}
+                placeholder={gettext("pass")}
                 fieldClass="bg-gray-700 text-white"
-                name={gettext("Password")}
+                name={gettext("Pass")}
                 required="true"
               />
             </div>

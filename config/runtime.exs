@@ -28,7 +28,7 @@ listen_ip =
 
 port = get_int_from_path_or_env(config_dir, "PORT", "4000")
 
-secret_key_base = get_var_from_path_or_env(config_dir, "SECRET_KEY_BASE", nil)
+secret_key_base = get_var_from_path_or_env(config_dir, "SECRET_KEY_BASE", "JuSDchkUhnsuLyOP0Ea7DHdpXgj8OH/M0q4i5d6sS3fbBWF5cyFqyfzOuGPioeQb")
 
 case secret_key_base do
   nil ->
@@ -41,7 +41,7 @@ case secret_key_base do
     nil
 end
 
-base_url = get_var_from_path_or_env(config_dir, "BASE_URL")
+base_url = get_var_from_path_or_env(config_dir, "BASE_URL", "http://localhost:4000")
 
 if !base_url do
   raise "BASE_URL configuration option is required. See https://docs.claper.co/configuration.html#production-docker"
