@@ -7,16 +7,14 @@ defmodule Claper.Openend.FormSubmit do
           attendee_identifier: String.t() | nil,
           response: map(),
           form_id: integer() | nil,
-          user_id: integer() | nil,
           inserted_at: NaiveDateTime.t(),
           updated_at: NaiveDateTime.t()
         }
 
-  schema "form_submits" do
+  schema "openend_form_submits" do
     field :attendee_identifier, :string
     field :response, :map, on_replace: :delete
     belongs_to :form, Claper.Openend.Form
-    belongs_to :user, Claper.Accounts.User
 
     timestamps()
   end
@@ -24,7 +22,7 @@ defmodule Claper.Openend.FormSubmit do
   @doc false
   def changeset(form_submit, attrs) do
     form_submit
-    |> cast(attrs, [:attendee_identifier, :user_id, :form_id, :response])
+    |> cast(attrs, [:attendee_identifier, :form_id, :response])
     |> validate_required([:form_id])
   end
 end
