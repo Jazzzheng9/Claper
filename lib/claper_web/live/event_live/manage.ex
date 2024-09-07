@@ -758,16 +758,16 @@ defmodule ClaperWeb.EventLive.Manage do
     })
   end
 
-  defp apply_action(socket, :add_form, _params) do
+  defp apply_action(socket, :add_openend, _params) do
     socket
-    |> assign(:create, "form")
+    |> assign(:create, "openend")
     |> assign(:form, %Openend.Form{
       fields: [
-        %Openend.Field{name: gettext("Answer"), type: "text"}
+        %Openend.Field{name: gettext("Name"), type: "text"},
+        %Openend.Field{name: gettext("Email"), type: "email"}
       ]
     })
   end
-
 
   defp apply_action(socket, :add_embed, _params) do
     socket

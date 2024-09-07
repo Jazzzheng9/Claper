@@ -8,17 +8,20 @@ defmodule Claper.Openend.Form do
           position: integer() | nil,
           title: String.t(),
           fields: [Claper.Openend.Field.t()] | nil,
+          presentation_file_id: integer() | nil,
           form_submits: [Claper.Openend.FormSubmit.t()] | nil,
           inserted_at: NaiveDateTime.t(),
           updated_at: NaiveDateTime.t()
         }
 
-  schema "openend_forms" do
+  @derive {Jason.Encoder, only: [:title, :position]}
+  schema "forms" do
     field :enabled, :boolean, default: true
     field :position, :integer, default: 0
     field :title, :string
     embeds_many :fields, Claper.Openend.Field, on_replace: :delete
 
+    belongs_to :presentation_file, Claper.Presentations.PresentationFile
     has_many :form_submits, Claper.Openend.FormSubmit, on_replace: :delete
 
     timestamps()
@@ -27,8 +30,8 @@ defmodule Claper.Openend.Form do
   @doc false
   def changeset(form, attrs \\ %{}) do
     form
-    |> cast(attrs, [:enabled, :title, :position])
+    |> cast(attrs, [:enabled, :title, :presentation_file_id, :position])
     |> cast_embed(:fields)
-    |> validate_required([:title, :position])
+    |> validate_required([:title, :presentation_file_id, :position])
   end
 end
