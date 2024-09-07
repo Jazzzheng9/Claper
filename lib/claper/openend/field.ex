@@ -14,8 +14,8 @@ defmodule Claper.Openend.Field do
   end
 
   @doc false
-  def changeset(form, attrs \\ %{}) do
-    form
+  def changeset(field, attrs \\ %{}) do
+    field
     |> cast(attrs, [:name, :type])
     |> validate_required([:name, :type])
   end
