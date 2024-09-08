@@ -144,12 +144,9 @@ defmodule ClaperWeb.EventLive.FormComponent do
          ) do
       {:ok, form_submit} ->
         # Append the new form_submit to the list of existing form_submits
-        updated_form_submits = [form_submit | socket.assigns.form.form_submits]
-
         {:noreply,
           socket
-          |> assign(:current_form_submit, form_submit)
-          |> assign(:form, %{socket.assigns.form | form_submits: updated_form_submits})}
+          |> assign(:current_form_submit, form_submit)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -172,8 +169,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
 
         {:noreply,
         socket
-        |> assign(:current_form_submit, form_submit)
-}
+        |> assign(:current_form_submit, form_submit)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
