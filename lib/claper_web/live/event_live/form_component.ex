@@ -94,30 +94,21 @@ defmodule ClaperWeb.EventLive.FormComponent do
               </div>
             <% end %>
           </div>
-
-          <%= if @all_submissions do %>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4"><%= gettext("All Attendees' Responses") %></h3>
-            <div class="space-y-4">
-              <%= for submission <- @all_submissions do %>
-                <div class="bg-gray-100 p-4 rounded-md shadow">
-                  <div class="flex space-x-3">
-                    <img
-                      class="h-8 w-8"
-                      src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}.svg"}
-                    />
-                    <div>
-                      <%= for {field, value} <- submission.response do %>
-                        <p><strong><%= field %>:</strong> <%= value %></p>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          <% else %>
-            <p><%= gettext("No submissions available.") %></p>
-          <% end %>
         <% end %>
+
+        <div id="extended-form" class="bg-white w-full py-3 px-6 text-black shadow-lg rounded-md">
+
+
+
+        <%= if match?(%Ecto.Association.NotLoaded{}, @form.form_submits) do %>
+          <p>Form submissions are not loaded yet.</p>
+        <% else %>
+          <p>@form.title</p>
+        <% end %>
+
+
+
+        </div>
       </div>
     </div>
     """
@@ -125,12 +116,14 @@ defmodule ClaperWeb.EventLive.FormComponent do
 
   @impl true
   def mount(_params, _session, socket) do
-    # Fetch all submissions for the form when the component is mounted
-    submissions = Claper.Forms.get_all_form_submissions(socket.assigns.form.id)
+    # Preload the form_submits association when mounting
+    form = Repo.get!(Claper.Forms.Form, socket.assigns.form.id)
+    form = Repo.preload(form, :form_submits)
 
-    # Assign all_submissions to the socket so it's available for rendering
-    {:ok, assign(socket, :all_submissions, submissions)}
+    # Assign the form with preloaded submissions to the socket
+    {:ok, assign(socket, :form, form)}
   end
+
 
 
   @impl true
@@ -170,7 +163,6 @@ defmodule ClaperWeb.EventLive.FormComponent do
   end
 
 
-  @impl true
   @impl true
   def handle_event(
         "submit",
