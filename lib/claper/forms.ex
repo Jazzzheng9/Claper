@@ -363,7 +363,10 @@ defmodule Claper.Forms do
   end
 
   def get_all_form_submissions(form_id) do
-    from(fs in Claper.Forms.FormSubmit, where: fs.form_id == ^form_id, preload: [:user])
+    from(fs in FormSubmit,
+      where: fs.form_id == ^form_id,
+      preload: [:form]
+    )
     |> Repo.all()
   end
 

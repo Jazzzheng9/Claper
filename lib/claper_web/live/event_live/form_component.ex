@@ -53,19 +53,40 @@ defmodule ClaperWeb.EventLive.FormComponent do
         </div>
         <%= form_for :form_submit, "#", [id: @id, phx_change: "validate", phx_target: @myself, phx_submit: "submit"], fn f -> %>
           <div class="flex flex-col space-y-3">
-            <ClaperWeb.Component.Input.text
-              form={f}
-              labelClass="text-white"
-              fieldClass="bg-gray-700 text-white"
-              key={String.to_atom(" ")}
-              name={" "}
-              required="true"
-              value={
-                if is_nil(assigns.current_form_submit),
-                  do: ~c"",
-                  else: assigns.current_form_submit.response[" "]
-              }
-            />
+            <%= if (length @form.fields) > 0 do %>
+              <%= for field <- @form.fields do %>
+                <%= case field.type do %>
+                  <% "text" -> %>
+                    <ClaperWeb.Component.Input.text
+                      form={f}
+                      labelClass="text-white"
+                      fieldClass="bg-gray-700 text-white"
+                      key={String.to_atom(field.name)}
+                      name={field.name}
+                      required="true"
+                      value={
+                        if is_nil(assigns.current_form_submit),
+                          do: ~c"",
+                          else: assigns.current_form_submit.response[field.name]
+                      }
+                    />
+                  <% "email" -> %>
+                    <ClaperWeb.Component.Input.email
+                      form={f}
+                      labelClass="text-white"
+                      fieldClass="bg-gray-700 text-white"
+                      key={String.to_atom(field.name)}
+                      name={field.name}
+                      required="true"
+                      value={
+                        if is_nil(assigns.current_form_submit),
+                          do: ~c"",
+                          else: assigns.current_form_submit.response[field.name]
+                      }
+                    />
+                <% end %>
+              <% end %>
+            <% end %>
           </div>
 
           <div class="flex items-center gap-4">
@@ -95,28 +116,9 @@ defmodule ClaperWeb.EventLive.FormComponent do
             <% end %>
           </div>
         <% end %>
-
-        <div id="extended-form" class="bg-white w-full py-3 px-6 text-black shadow-lg rounded-md">
-          <%= if match?(%Ecto.Association.NotLoaded{}, @form.form_submits) do %>
-            <p>Form submissions are not loaded yet.</p>
-          <% else %>
-            <p><%= @form %></p>
-            <p><%= "end" %></p>
-          <% end %>
-        </div>
       </div>
     </div>
     """
-  end
-
-  @impl true
-  def mount(_params, _session, socket) do
-    # Fetch all submissions for the form when the component is mounted
-    form_id = socket.assigns.form.id
-    all_form_submissions = Claper.Forms.get_all_form_submissions(form_id)
-
-    # Assign all submissions to the socket for rendering
-    {:ok, assign(socket, :all_form_submissions, all_form_submissions)}
   end
 
   @impl true
@@ -143,13 +145,9 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
-        # Append the new form_submit to the list of existing form_submits
-        updated_form_submits = [form_submit | socket.assigns.form.form_submits]
-
         {:noreply,
-          socket
-          |> assign(:current_form_submit, form_submit)
-          |> assign(:form, %{socket.assigns.form | form_submits: updated_form_submits})}
+         socket
+         |> assign(:current_form_submit, form_submit)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -169,17 +167,14 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
-
         {:noreply,
-        socket
-        |> assign(:current_form_submit, form_submit)
-}
+         socket
+         |> assign(:current_form_submit, form_submit)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
     end
   end
-
 
   def toggle_form(js \\ %JS{}) do
     js
