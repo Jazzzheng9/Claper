@@ -97,27 +97,16 @@ defmodule ClaperWeb.EventLive.FormComponent do
         <% end %>
 
         <div id="extended-form" class="bg-white w-full py-3 px-6 text-black shadow-lg rounded-md">
-          <%= if match?(%Ecto.Association.NotLoaded{}, @form.form_submits) do %>
-            <p>Form submissions are not loaded yet.</p>
-          <% else %>
-            <p><%= @form %></p>
-            <p><%= "end" %></p>
-          <% end %>
+          <p><%= if @current_form_submit, do: @current_form_submit.response[" "], else: "No value" %></p>
+          <p><%= "end" %></p>
+
         </div>
       </div>
     </div>
     """
   end
 
-  @impl true
-  def mount(_params, _session, socket) do
-    # Fetch all submissions for the form when the component is mounted
-    form_id = socket.assigns.form.id
-    all_form_submissions = Claper.Forms.get_all_form_submissions(form_id)
 
-    # Assign all submissions to the socket for rendering
-    {:ok, assign(socket, :all_form_submissions, all_form_submissions)}
-  end
 
   @impl true
   def handle_event("validate", %{"form_submit" => form_submit_params}, socket) do
@@ -133,16 +122,18 @@ defmodule ClaperWeb.EventLive.FormComponent do
   def handle_event(
         "submit",
         %{"form_submit" => params},
-        %{assigns: %{current_user: current_user}} = socket
-      )
-      when is_map(current_user) do
+        %{assigns: %{attendee_identifier: attendee_identifier}} = socket
+      ) do
     case Claper.Forms.create_or_update_form_submit(
            socket.assigns.event.uuid,
            %{"response" => params}
-           |> Map.put("user_id", socket.assigns.current_user.id)
+           |> Map.put("attendee_identifier", attendee_identifier)
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
+        event_id = socket.assigns.event.uuid
+        list_form = Claper.Forms.list_forms(event_id)
+
         # Append the new form_submit to the list of existing form_submits
         {:noreply,
           socket
@@ -153,23 +144,28 @@ defmodule ClaperWeb.EventLive.FormComponent do
     end
   end
 
+
   @impl true
   def handle_event(
         "submit",
         %{"form_submit" => params},
-        %{assigns: %{attendee_identifier: attendee_identifier}} = socket
-      ) do
+        %{assigns: %{current_user: current_user}} = socket
+      )
+      when is_map(current_user) do
     case Claper.Forms.create_or_update_form_submit(
            socket.assigns.event.uuid,
            %{"response" => params}
-           |> Map.put("attendee_identifier", attendee_identifier)
+           |> Map.put("user_id", socket.assigns.current_user.id)
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
+        event_id = socket.assigns.event.uuid
+        list_form = Claper.Forms.list_forms(event_id)
 
+        # Append the new form_submit to the list of existing form_submits
         {:noreply,
-        socket
-        |> assign(:current_form_submit, form_submit)}
+          socket
+          |> assign(:current_form_submit, form_submit)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
