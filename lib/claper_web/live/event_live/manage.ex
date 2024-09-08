@@ -364,6 +364,21 @@ defmodule ClaperWeb.EventLive.Manage do
     end
   end
 
+  def handle_event("openend-set-active", %{"id" => id}, socket) do
+    with openend <- Openend.get_form!(id), :ok <- Claper.Interactions.enable_interaction(openend) do
+      Phoenix.PubSub.broadcast(
+        Claper.PubSub,
+        "event:#{socket.assigns.event.uuid}",
+        {:current_interaction, openend}
+      )
+
+      {:noreply,
+       socket
+       |> assign(:current_interaction, openend)
+       |> interactions_at_position(socket.assigns.state.position)}
+    end
+  end
+
   def handle_event("embed-set-active", %{"id" => id}, socket) do
     with embed <- Embeds.get_embed!(id), :ok <- Claper.Interactions.enable_interaction(embed) do
       Phoenix.PubSub.broadcast(
