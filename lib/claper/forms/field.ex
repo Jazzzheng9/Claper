@@ -9,7 +9,7 @@ defmodule Claper.Forms.Field do
 
   @primary_key false
   embedded_schema do
-    field :name, :string
+    field :name, :string, default: ""
     field :type, :string
   end
 

@@ -702,7 +702,6 @@ defmodule ClaperWeb.EventLive.Manage do
     |> assign(:form, %Forms.Form{
       fields: [
         %Forms.Field{name: gettext("Name"), type: "text"},
-        %Forms.Field{name: gettext("Email"), type: "email"}
       ]
     })
   end

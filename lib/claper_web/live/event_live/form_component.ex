@@ -53,40 +53,19 @@ defmodule ClaperWeb.EventLive.FormComponent do
         </div>
         <%= form_for :form_submit, "#", [id: @id, phx_change: "validate", phx_target: @myself, phx_submit: "submit"], fn f -> %>
           <div class="flex flex-col space-y-3">
-            <%= if (length @form.fields) > 0 do %>
-              <%= for field <- @form.fields do %>
-                <%= case field.type do %>
-                  <% "text" -> %>
-                    <ClaperWeb.Component.Input.text
-                      form={f}
-                      labelClass="text-white"
-                      fieldClass="bg-gray-700 text-white"
-                      key={String.to_atom(field.name)}
-                      name={field.name}
-                      required="true"
-                      value={
-                        if is_nil(assigns.current_form_submit),
-                          do: ~c"",
-                          else: assigns.current_form_submit.response[field.name]
-                      }
-                    />
-                  <% "email" -> %>
-                    <ClaperWeb.Component.Input.email
-                      form={f}
-                      labelClass="text-white"
-                      fieldClass="bg-gray-700 text-white"
-                      key={String.to_atom(field.name)}
-                      name={field.name}
-                      required="true"
-                      value={
-                        if is_nil(assigns.current_form_submit),
-                          do: ~c"",
-                          else: assigns.current_form_submit.response[field.name]
-                      }
-                    />
-                <% end %>
-              <% end %>
-            <% end %>
+            <ClaperWeb.Component.Input.text
+              form={f}
+              labelClass="text-white"
+              fieldClass="bg-gray-700 text-white"
+              key={String.to_atom(" ")}
+              name={" "}
+              required="true"
+              value={
+                if is_nil(assigns.current_form_submit),
+                  do: ~c"",
+                  else: assigns.current_form_submit.response[" "]
+              }
+            />
           </div>
 
           <div class="flex items-center gap-4">
