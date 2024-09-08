@@ -689,6 +689,7 @@ defmodule ClaperWeb.EventLive.Manage do
     end
   end
 
+
   @impl true
   def handle_event("delete-poll", %{"id" => id}, socket) do
     poll = Polls.get_poll!(id)
