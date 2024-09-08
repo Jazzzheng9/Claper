@@ -361,4 +361,11 @@ defmodule Claper.Forms do
   def change_form_submit(%FormSubmit{} = form_submit, attrs \\ %{}) do
     FormSubmit.changeset(form_submit, attrs)
   end
+
+  def get_all_form_submissions(form_id) do
+    from(fs in Claper.Forms.FormSubmit, where: fs.form_id == ^form_id, preload: [:user])
+    |> Repo.all()
+  end
+
+
 end
