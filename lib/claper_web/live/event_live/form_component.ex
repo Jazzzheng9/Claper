@@ -94,20 +94,11 @@ defmodule ClaperWeb.EventLive.FormComponent do
               </div>
             <% end %>
           </div>
-        <% end %>
 
+        <% end %>
         <div id="extended-form" class="bg-white w-full py-3 px-6 text-black shadow-lg rounded-md">
-
-
-
-        <%= if match?(%Ecto.Association.NotLoaded{}, @form.form_submits) do %>
-          <p>Form submissions are not loaded yet.</p>
-        <% else %>
-          <p>@form.title</p>
-        <% end %>
-
-
-
+          <p><%= if @current_form_submit, do: @current_form_submit.response[" "], else: "No value" %></p>
+          <p><%= "end" %></p>
         </div>
       </div>
     </div>
@@ -116,14 +107,12 @@ defmodule ClaperWeb.EventLive.FormComponent do
 
   @impl true
   def mount(_params, _session, socket) do
-    # Preload the form_submits association when mounting
-    form = Repo.get!(Claper.Forms.Form, socket.assigns.form.id)
-    form = Repo.preload(form, :form_submits)
+    # Fetch all submissions for the form when the component is mounted
+    submissions = Claper.Forms.get_all_form_submissions(socket.assigns.form.id)
 
-    # Assign the form with preloaded submissions to the socket
-    {:ok, assign(socket, :form, form)}
+    # Assign all_submissions to the socket so it's available for rendering
+    {:ok, assign(socket, :all_submissions, submissions)}
   end
-
 
 
   @impl true
