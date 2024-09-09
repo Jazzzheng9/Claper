@@ -39,7 +39,7 @@ defmodule Claper.Events.ActivityLeader do
     ])
     |> validate_required([:email])
     |> validate_format(:email, ~r/^$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, min: 6, max: 160)
+    |> validate_length(:email, min: 2, max: 160)
     |> unique_constraint(:email)
     |> validate_not_current_user_email
     |> unsafe_validate_unique([:event_id, :email], Claper.Repo)

@@ -53,13 +53,13 @@ defmodule Claper.Posts.Post do
       :pinned
     ])
     |> validate_required([:body, :position])
-    |> validate_length(:body, min: 2, max: 255)
+    |> validate_length(:body, min: 0, max: 255)
   end
 
   def nickname_changeset(post, attrs) do
     post
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> validate_length(:name, min: 2, max: 20)
+    |> validate_length(:name, min: 0, max: 20)
   end
 end
