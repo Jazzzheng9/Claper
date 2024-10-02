@@ -195,10 +195,10 @@
                 </div>
                 <div class="ml-4 flex-auto text-left">
                   <p class="font-medium text-gray-700">
-                    <%= gettext("Open-ended Question") %>
+                    <%= gettext("Form") %>
                   </p>
                   <p class="text-gray-500">
-                    <%= gettext("Add an open-ended question.") %>
+                    <%= gettext("Add form to collect data from your public.") %>
                   </p>
                 </div>
               </a>
@@ -261,7 +261,7 @@
           <div class="scroll-py-3 overflow-y-auto bg-gray-100 p-3">
             <p class="text-xl font-bold">
               <%= case @create_action do
-                :new -> gettext("New open-ended question")
+                :new -> gettext("New form")
                 :edit -> gettext("Edit form")
               end %>
             </p>
