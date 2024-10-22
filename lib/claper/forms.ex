@@ -361,8 +361,4 @@ defmodule Claper.Forms do
   def change_form_submit(%FormSubmit{} = form_submit, attrs \\ %{}) do
     FormSubmit.changeset(form_submit, attrs)
   end
-
-
-
-
 end
