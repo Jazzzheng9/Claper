@@ -5,6 +5,7 @@ defmodule ClaperWeb.EventLive.Manage do
   alias Claper.Polls
   alias Claper.Forms
   alias Claper.Embeds
+  alias Claper.Openends
 
   @impl true
   def mount(%{"code" => code}, session, socket) do
@@ -205,6 +206,13 @@ defmodule ClaperWeb.EventLive.Manage do
   end
 
   @impl true
+  def handle_info({:openend_created, openend}, socket) do
+    {:noreply,
+     socket
+     |> interactions_at_position(openend.position)}
+  end
+
+  @impl true
   def handle_info({:embed_created, embed}, socket) do
     {:noreply,
      socket
@@ -233,6 +241,13 @@ defmodule ClaperWeb.EventLive.Manage do
   end
 
   @impl true
+  def handle_info({:openend_updated, openend}, socket) do
+    {:noreply,
+     socket
+     |> interactions_at_position(openend.position)}
+  end
+
+  @impl true
   def handle_info({:poll_deleted, poll}, socket) do
     {:noreply,
      socket
@@ -251,6 +266,13 @@ defmodule ClaperWeb.EventLive.Manage do
     {:noreply,
      socket
      |> interactions_at_position(form.position)}
+  end
+
+  @impl true
+  def handle_info({:openend_deleted, openend}, socket) do
+    {:noreply,
+     socket
+     |> interactions_at_position(openend.position)}
   end
 
   @impl true
@@ -342,6 +364,21 @@ defmodule ClaperWeb.EventLive.Manage do
     end
   end
 
+  def handle_event("openend-set-active", %{"id" => id}, socket) do
+    with openend <- Openends.get_openend!(id), :ok <- Claper.Interactions.enable_interaction(openend) do
+      Phoenix.PubSub.broadcast(
+        Claper.PubSub,
+        "event:#{socket.assigns.event.uuid}",
+        {:current_interaction, openend}
+      )
+
+      {:noreply,
+       socket
+       |> assign(:current_interaction, openend)
+       |> interactions_at_position(socket.assigns.state.position)}
+    end
+  end
+
   def handle_event("embed-set-active", %{"id" => id}, socket) do
     with embed <- Embeds.get_embed!(id), :ok <- Claper.Interactions.enable_interaction(embed) do
       Phoenix.PubSub.broadcast(
@@ -374,6 +411,21 @@ defmodule ClaperWeb.EventLive.Manage do
 
   def handle_event("form-set-inactive", %{"id" => id}, socket) do
     with form <- Forms.get_form!(id), {:ok, _} <- Claper.Interactions.disable_interaction(form) do
+      Phoenix.PubSub.broadcast(
+        Claper.PubSub,
+        "event:#{socket.assigns.event.uuid}",
+        {:current_interaction, nil}
+      )
+    end
+
+    {:noreply,
+     socket
+     |> assign(:current_interaction, nil)
+     |> interactions_at_position(socket.assigns.state.position)}
+  end
+
+  def handle_event("openend-set-inactive", %{"id" => id}, socket) do
+    with openend <- Openends.get_openend!(id), {:ok, _} <- Claper.Interactions.disable_interaction(openend) do
       Phoenix.PubSub.broadcast(
         Claper.PubSub,
         "event:#{socket.assigns.event.uuid}",
@@ -448,6 +500,8 @@ defmodule ClaperWeb.EventLive.Manage do
     {:noreply, socket |> assign(:state, new_state)}
   end
 
+
+  # openend chech this lines for real time update 
   @impl true
   def handle_event(
         "checked",
@@ -593,6 +647,19 @@ defmodule ClaperWeb.EventLive.Manage do
   end
 
   @impl true
+  def handle_event("delete-openend-submit", %{"event-id" => event_id, "id" => id}, socket) do
+    openend = Claper.Openends.get_openend_submit_by_id!(id)
+    {:ok, _} = Claper.Openends.delete_openend_submit(event_id, openend)
+
+    {:noreply,
+     assign(
+       socket,
+       :openend_submits,
+       list_openend_submits(socket, socket.assigns.event.presentation_file.id)
+     )}
+  end
+
+  @impl true
   def handle_event("list-tab", %{"tab" => tab}, socket) do
     socket = assign(socket, :list_tab, String.to_atom(tab))
 
@@ -706,6 +773,16 @@ defmodule ClaperWeb.EventLive.Manage do
     })
   end
 
+  defp apply_action(socket, :add_openend, _params) do
+    socket
+    |> assign(:create, "openend")
+    |> assign(:openend, %Openends.Openend{
+      fields: [
+        %Openends.Field{name: gettext("Name"), type: "text"},
+      ]
+    })
+  end
+
   defp apply_action(socket, :add_embed, _params) do
     socket
     |> assign(:create, "embed")
@@ -725,6 +802,15 @@ defmodule ClaperWeb.EventLive.Manage do
     |> assign(:create, "form")
     |> assign(:create_action, :edit)
     |> assign(:form, form)
+  end
+
+  defp apply_action(socket, :edit_openend, %{"id" => id}) do
+    openend = Openends.get_openend!(id)
+
+    socket
+    |> assign(:create, "openend")
+    |> assign(:create_action, :edit)
+    |> assign(:openend, openend)
   end
 
   defp apply_action(socket, :edit_embed, %{"id" => id}) do
@@ -783,5 +869,9 @@ defmodule ClaperWeb.EventLive.Manage do
 
   defp list_form_submits(_socket, presentation_file_id) do
     Claper.Forms.list_form_submits(presentation_file_id, [:form])
+  end  
+  
+  defp list_openend_submits(_socket, presentation_file_id) do
+    Claper.Openends.list_openend_submits(presentation_file_id, [:form])
   end
 end

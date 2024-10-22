@@ -4,7 +4,8 @@ defmodule ClaperWeb.EventLive.Presenter do
   alias ClaperWeb.Presence
   alias Claper.Embeds.Embed
   alias Claper.Polls.Poll
-  alias Claper.Forms.Form
+  alias Claper.Forms.Form  
+  alias Claper.Openends.Openend
 
   @impl true
   def mount(%{"code" => code} = params, session, socket) do
@@ -63,6 +64,7 @@ defmodule ClaperWeb.EventLive.Presenter do
         |> assign(:reacts, [])
         |> poll_at_position
         |> form_at_position
+        |> openend_at_position
         |> embed_at_position
 
       {:ok, socket, temporary_assigns: []}
@@ -182,6 +184,26 @@ defmodule ClaperWeb.EventLive.Presenter do
   end
 
   @impl true
+  def handle_info({:openend_updated, openend}, socket) do
+    if openend.active do
+      {:noreply,
+       socket
+       |> update(:current_openend, fn _current_openend -> openend end)}
+    else
+      {:noreply,
+       socket
+       |> update(:current_openend, fn _current_openend -> nil end)}
+    end
+  end
+
+  @impl true
+  def handle_info({:openend_deleted, _openend}, socket) do
+    {:noreply,
+     socket
+     |> update(:current_openend, fn _current_openend -> nil end)}
+  end
+
+  @impl true
   def handle_info({:embed_updated, embed}, socket) do
     if embed.enabled do
       {:noreply,
@@ -249,7 +271,8 @@ defmodule ClaperWeb.EventLive.Presenter do
      socket
      |> assign(:current_poll, interaction)
      |> assign(:current_embed, nil)
-     |> assign(:current_form, nil)}
+     |> assign(:current_form, nil)
+     |> assign(:current_openend, nil)}
   end
 
   @impl true
@@ -261,7 +284,8 @@ defmodule ClaperWeb.EventLive.Presenter do
      socket
      |> assign(:current_embed, interaction)
      |> assign(:current_poll, nil)
-     |> assign(:current_form, nil)}
+     |> assign(:current_form, nil)
+     |> assign(:current_openend, nil)}
   end
 
   @impl true
@@ -273,7 +297,21 @@ defmodule ClaperWeb.EventLive.Presenter do
      socket
      |> assign(:current_form, interaction)
      |> assign(:current_poll, nil)
-     |> assign(:current_embed, nil)}
+     |> assign(:current_embed, nil)
+     |> assign(:current_openend, nil)}
+  end
+
+  @impl true
+  def handle_info(
+        {:current_interaction, %Openend{} = interaction},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:current_openend, interaction)
+     |> assign(:current_poll, nil)
+     |> assign(:current_embed, nil)
+     |> assign(:current_form, nil)}
   end
 
   @impl true
@@ -285,7 +323,8 @@ defmodule ClaperWeb.EventLive.Presenter do
      socket
      |> assign(:current_poll, nil)
      |> assign(:current_embed, nil)
-     |> assign(:current_form, nil)}
+     |> assign(:current_form, nil)
+     |> assign(:current_openend, nil)}
   end
 
   @impl true
@@ -319,6 +358,16 @@ defmodule ClaperWeb.EventLive.Presenter do
              state.position
            ) do
       socket |> assign(:current_form, form)
+    end
+  end
+
+  defp openend_at_position(%{assigns: %{event: event, state: state}} = socket) do
+    with openend <-
+           Claper.Openends.get_openend_current_position(
+             event.presentation_file.id,
+             state.position
+           ) do
+      socket |> assign(:current_openend, openend)
     end
   end
 

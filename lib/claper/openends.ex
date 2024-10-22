@@ -1,4 +1,4 @@
-defmodule Claper.Openend do
+defmodule Claper.Openends do
   @moduledoc """
   The Forms context.
   """
@@ -6,9 +6,9 @@ defmodule Claper.Openend do
   import Ecto.Query, warn: false
   alias Claper.Repo
 
-  alias Claper.Openend.Form
-  alias Claper.Openend.FormSubmit
-  alias Claper.Openend.Field
+  alias Claper.Openends.Openend
+  alias Claper.Openends.OpenendSubmit
+  alias Claper.Openends.Field
 
   @doc """
   Returns the list of forms for a given presentation file.
@@ -19,10 +19,10 @@ defmodule Claper.Openend do
       [%Form{}, ...]
 
   """
-  def list_forms(presentation_file_id) do
-    from(f in Form,
-      where: f.presentation_file_id == ^presentation_file_id,
-      order_by: [asc: f.id, asc: f.position]
+  def list_openends(presentation_file_id) do
+    from(o in Openend,
+      where: o.presentation_file_id == ^presentation_file_id,
+      order_by: [asc: o.id, asc: o.position]
     )
     |> Repo.all()
   end
@@ -36,10 +36,10 @@ defmodule Claper.Openend do
       [%Form{}, ...]
 
   """
-  def list_forms_at_position(presentation_file_id, position) do
-    from(f in Form,
-      where: f.presentation_file_id == ^presentation_file_id and f.position == ^position,
-      order_by: [asc: f.id]
+  def list_openends_at_position(presentation_file_id, position) do
+    from(o in Openend,
+      where: o.presentation_file_id == ^presentation_file_id and o.position == ^position,
+      order_by: [asc: o.id]
     )
     |> Repo.all()
   end
@@ -58,8 +58,8 @@ defmodule Claper.Openend do
       ** (Ecto.NoResultsError)
 
   """
-  def get_form!(id, preload \\ []),
-    do: Repo.get!(Form, id) |> Repo.preload(preload)
+  def get_openend!(id, preload \\ []),
+    do: Repo.get!(Openend, id) |> Repo.preload(preload)
 
   @doc """
   Gets a single form for a given position.
@@ -70,11 +70,11 @@ defmodule Claper.Openend do
       %Form{}
 
   """
-  def get_form_current_position(presentation_file_id, position) do
-    from(f in Form,
+  def get_openend_current_position(presentation_file_id, position) do
+    from(o in Openend,
       where:
-        f.position == ^position and f.presentation_file_id == ^presentation_file_id and
-          f.enabled == true
+        o.position == ^position and o.presentation_file_id == ^presentation_file_id and
+          o.enabled == true
     )
     |> Repo.one()
   end
@@ -91,14 +91,14 @@ defmodule Claper.Openend do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_form(attrs \\ %{}) do
-    %Form{}
-    |> Form.changeset(attrs)
+  def create_openend(attrs \\ %{}) do
+    %Openend{}
+    |> Openend.changeset(attrs)
     |> Repo.insert()
     |> case do
-      {:ok, form} ->
-        form = Repo.preload(form, presentation_file: :event)
-        broadcast({:ok, form, form.presentation_file.event.uuid}, :form_created)
+      {:ok, openend} ->
+        openend = Repo.preload(openend, presentation_file: :event)
+        broadcast({:ok, openend, openend.presentation_file.event.uuid}, :openend_created)
 
       {:error, changeset} ->
         {:error, %{changeset | action: :insert}}
@@ -117,13 +117,13 @@ defmodule Claper.Openend do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_form(event_uuid, %Form{} = form, attrs) do
-    form
-    |> Form.changeset(attrs)
+  def update_openend(event_uuid, %Openend{} = openend, attrs) do
+    openend
+    |> Openend.changeset(attrs)
     |> Repo.update()
     |> case do
-      {:ok, form} ->
-        broadcast({:ok, form, event_uuid}, :form_updated)
+      {:ok, openend} ->
+        broadcast({:ok, openend, event_uuid}, :openend_updated)
 
       {:error, changeset} ->
         {:error, %{changeset | action: :update}}
@@ -142,9 +142,9 @@ defmodule Claper.Openend do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_form(event_uuid, %Form{} = form) do
-    {:ok, form} = Repo.delete(form)
-    broadcast({:ok, form, event_uuid}, :form_deleted)
+  def delete_openend(event_uuid, %Openend{} = openend) do
+    {:ok, openend} = Repo.delete(openend)
+    broadcast({:ok, openend, event_uuid}, :openend_deleted)
   end
 
   @doc """
@@ -156,14 +156,14 @@ defmodule Claper.Openend do
       %Ecto.Changeset{data: %Form{}}
 
   """
-  def change_form(%Form{} = form, attrs \\ %{}) do
-    Form.changeset(form, attrs)
+  def change_openend(%Openend{} = openend, attrs \\ %{}) do
+    Openend.changeset(openend, attrs)
   end
 
   @doc """
   Add an empty form field to a form changeset.
   """
-  def add_form_field(changeset) do
+  def add_openend_field(changeset) do
     changeset
     |> Ecto.Changeset.put_embed(
       :fields,
@@ -174,7 +174,7 @@ defmodule Claper.Openend do
   @doc """
   Remove a form field from a form changeset.
   """
-  def remove_form_field(changeset, field) do
+  def remove_openend_field(changeset, field) do
     changeset
     |> Ecto.Changeset.put_embed(
       :fields,
@@ -183,20 +183,20 @@ defmodule Claper.Openend do
   end
 
   def disable_all(presentation_file_id, position) do
-    from(f in Form,
-      where: f.presentation_file_id == ^presentation_file_id and f.position == ^position
+    from(o in Openend,
+      where: o.presentation_file_id == ^presentation_file_id and o.position == ^position
     )
     |> Repo.update_all(set: [enabled: false])
   end
 
   def set_enabled(id) do
-    get_form!(id)
+    get_openend!(id)
     |> Ecto.Changeset.change(enabled: true)
     |> Repo.update()
   end
 
   def set_disabled(id) do
-    get_form!(id)
+    get_openend!(id)
     |> Ecto.Changeset.change(enabled: false)
     |> Repo.update()
   end
@@ -225,9 +225,9 @@ defmodule Claper.Openend do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_form_submit(attrs \\ %{}) do
-    %FormSubmit{}
-    |> FormSubmit.changeset(attrs)
+  def create_openend_submit(attrs \\ %{}) do
+    %OpenendSubmit{}
+    |> OpenendSubmit.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -240,11 +240,11 @@ defmodule Claper.Openend do
       [%FormSubmit{}, ...]
 
   """
-  def list_form_submits(presentation_file_id, preload \\ []) do
-    from(fs in FormSubmit,
-      join: f in Form,
-      on: f.id == fs.form_id,
-      where: f.presentation_file_id == ^presentation_file_id
+  def list_openend_submits(presentation_file_id, preload \\ []) do
+    from(os in OpenendSubmit,
+      join: o in Openend,
+      on: o.id == os.openend_id,
+      where: o.presentation_file_id == ^presentation_file_id
     )
     |> Repo.all()
     |> Repo.preload(preload)
@@ -259,11 +259,11 @@ defmodule Claper.Openend do
       %FormSubmit{}
 
   """
-  def get_form_submit(user_id, form_id) when is_number(user_id),
-    do: Repo.get_by(FormSubmit, form_id: form_id, user_id: user_id)
+  def get_openend_submit(user_id, openend_id) when is_number(user_id),
+    do: Repo.get_by(OpenendSubmit, openend_id: openend_id, user_id: user_id)
 
-  def get_form_submit(attendee_identifier, form_id),
-    do: Repo.get_by(FormSubmit, form_id: form_id, attendee_identifier: attendee_identifier)
+  def get_openend_submit(attendee_identifier, openend_id),
+    do: Repo.get_by(OpenendSubmit, openend_id: openend_id, attendee_identifier: attendee_identifier)
 
   @doc """
   Gets a single FormSubmit by its ID.
@@ -279,8 +279,8 @@ defmodule Claper.Openend do
       ** (Ecto.NoResultsError)
 
   """
-  def get_form_submit_by_id!(id, preload \\ []),
-    do: Repo.get_by!(FormSubmit, id: id) |> Repo.preload(preload)
+  def get_openend_submit_by_id!(id, preload \\ []),
+    do: Repo.get_by!(OpenendSubmit, id: id) |> Repo.preload(preload)
 
   @doc """
   Creates or update a FormSubmit.
@@ -294,37 +294,37 @@ defmodule Claper.Openend do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_or_update_form_submit(
+  def create_or_update_openend_submit(
         event_uuid,
-        %{"user_id" => user_id, "form_id" => form_id} = attrs
+        %{"user_id" => user_id, "openend_id" => openend_id} = attrs
       )
       when is_number(user_id) do
-    get_form_submit(user_id, form_id) |> create_or_update_form_submit(event_uuid, attrs)
+    get_openend_submit(user_id, openend_id) |> create_or_update_openend_submit(event_uuid, attrs)
   end
 
-  def create_or_update_form_submit(
+  def create_or_update_openend_submit(
         event_uuid,
-        %{"attendee_identifier" => attendee_identifier, "form_id" => form_id} = attrs
+        %{"attendee_identifier" => attendee_identifier, "openend_id" => openend_id} = attrs
       ) do
-    get_form_submit(attendee_identifier, form_id)
-    |> create_or_update_form_submit(event_uuid, attrs)
+    get_openend_submit(attendee_identifier, openend_id)
+    |> create_or_update_openend_submit(event_uuid, attrs)
   end
 
-  def create_or_update_form_submit(fs, event_uuid, attrs) do
-    case fs do
-      nil -> %FormSubmit{}
-      form_submit -> form_submit
+  def create_or_update_openend_submit(os, event_uuid, attrs) do
+    case os do
+      nil -> %OpenendSubmit{}
+      openend_submit -> openend_submit
     end
-    |> FormSubmit.changeset(attrs)
+    |> OpenendSubmit.changeset(attrs)
     |> Repo.insert_or_update()
     |> case do
       {:ok, r} ->
         # Preloading form in FormSubmit
-        r = Repo.preload(r, :form)
+        r = Repo.preload(r, :openend)
 
-        case fs do
-          nil -> broadcast({:ok, r, event_uuid}, :form_submit_created)
-          _form_submit -> broadcast({:ok, r, event_uuid}, :form_submit_updated)
+        case os do
+          nil -> broadcast({:ok, r, event_uuid}, :openend_submit_created)
+          _openend_submit -> broadcast({:ok, r, event_uuid}, :openend_submit_updated)
         end
     end
   end
@@ -341,11 +341,11 @@ defmodule Claper.Openend do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_form_submit(event_uuid, %FormSubmit{} = fs) do
-    fs
+  def delete_openend_submit(event_uuid, %OpenendSubmit{} = os) do
+    os
     |> Repo.delete()
     |> case do
-      {:ok, r} -> broadcast({:ok, r, event_uuid}, :form_submit_deleted)
+      {:ok, r} -> broadcast({:ok, r, event_uuid}, :openend_submit_deleted)
     end
   end
 
@@ -358,7 +358,11 @@ defmodule Claper.Openend do
       %Ecto.Changeset{data: %FormSubmit{}}
 
   """
-  def change_form_submit(%FormSubmit{} = form_submit, attrs \\ %{}) do
-    FormSubmit.changeset(form_submit, attrs)
+  def change_openend_submit(%OpenendSubmit{} = openend_submit, attrs \\ %{}) do
+    OpenendSubmit.changeset(openend_submit, attrs)
   end
+
+
+
+
 end

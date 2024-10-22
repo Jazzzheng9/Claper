@@ -2,7 +2,7 @@ defmodule ClaperWeb.EventLive.Show do
   alias Claper.Interactions
   use ClaperWeb, :live_view
 
-  alias Claper.{Posts, Polls, Forms}
+  alias Claper.{Posts, Polls, Forms, Openends}
   alias ClaperWeb.Presence
 
   on_mount(ClaperWeb.AttendeeLiveAuth)
@@ -297,6 +297,20 @@ defmodule ClaperWeb.EventLive.Show do
 
   @impl true
   def handle_info({:form_deleted, %Claper.Forms.Form{enabled: true}}, socket) do
+    {:noreply,
+     socket
+     |> update(:current_interaction, fn _current_interaction -> nil end)}
+  end
+
+  @impl true
+  def handle_info({:openend_updated, %Claper.Openends.Openend{enabled: true} = openend}, socket) do
+    {:noreply,
+     socket
+     |> load_current_interaction(openend)}
+  end
+
+  @impl true
+  def handle_info({:openend_deleted, %Claper.Openends.Openend{enabled: true}}, socket) do
     {:noreply,
      socket
      |> update(:current_interaction, fn _current_interaction -> nil end)}
@@ -671,6 +685,20 @@ defmodule ClaperWeb.EventLive.Show do
     socket |> assign(:current_form_submit, fs)
   end
 
+  defp get_current_openend_submit(%{assigns: %{current_user: current_user}} = socket, openend_id)
+       when is_map(current_user) do
+    os = Openends.get_openend_submit(current_user.id, openend_id)
+    socket |> assign(:current_openend_submit, os)
+  end
+
+  defp get_current_openend_submit(
+         %{assigns: %{attendee_identifier: attendee_identifier}} = socket,
+         openend_id
+       ) do
+    fs = Openends.get_openend_submit(attendee_identifier, openend_id)
+    socket |> assign(:current_openend_submit, fs)
+  end
+
   defp reacted_posts(
          %{assigns: %{current_user: current_user} = _assigns} = _socket,
          event_id,
@@ -706,6 +734,10 @@ defmodule ClaperWeb.EventLive.Show do
 
   defp load_current_interaction(socket, %Forms.Form{} = interaction) do
     socket |> assign(:current_interaction, interaction) |> get_current_form_submit(interaction.id)
+  end
+
+  defp load_current_interaction(socket, %Openends.Openend{} = interaction) do
+    socket |> assign(:current_interaction, interaction) |> get_current_openend_submit(interaction.id)
   end
 
   defp load_current_interaction(socket, interaction) do

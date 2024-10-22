@@ -1,4 +1,4 @@
-defmodule Claper.Openend.Field do
+defmodule Claper.Openends.Field do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -14,8 +14,8 @@ defmodule Claper.Openend.Field do
   end
 
   @doc false
-  def changeset(field, attrs \\ %{}) do
-    field
+  def changeset(openend, attrs \\ %{}) do
+    openend
     |> cast(attrs, [:name, :type])
     |> validate_required([:name, :type])
   end
