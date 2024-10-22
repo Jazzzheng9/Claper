@@ -40,6 +40,10 @@ defmodule Claper.MixProject do
             ~r/Claper\.Forms\.?/,
             ~r/ClaperWeb\.Form\.?/
           ],
+          Openends: [
+            ~r/Claper\.Openends\.?/,
+            ~r/ClaperWeb\.Openend\.?/
+          ],
           WebContent: [
             ~r/Claper\.Embed\.?/,
             ~r/ClaperWeb\.Embed\.?/

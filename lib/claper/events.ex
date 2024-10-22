@@ -297,12 +297,12 @@ defmodule Claper.Events do
          |> Ecto.Multi.run(:from_event, fn _repo, _changes ->
            {:ok,
             get_user_event!(user_id, from_event_uuid,
-              presentation_file: [polls: [:poll_opts], forms: [], embeds: []]
+              presentation_file: [polls: [:poll_opts], forms: [], openends: [], embeds: []]
             )}
          end)
          |> Ecto.Multi.run(:to_event, fn _repo, _changes ->
            {:ok,
-            get_user_event!(user_id, to_event_uuid, presentation_file: [:polls, :forms, :embeds])}
+            get_user_event!(user_id, to_event_uuid, presentation_file: [:polls, :forms, :openends, :embeds])}
          end)
          |> Ecto.Multi.run(:polls, fn _repo, %{from_event: from_event, to_event: to_event} ->
            {:ok,
@@ -324,26 +324,47 @@ defmodule Claper.Events do
             end)}
          end)
          |> Ecto.Multi.run(:forms, fn _repo, %{from_event: from_event, to_event: to_event} ->
-           {:ok,
-            from_event.presentation_file.forms
-            |> Enum.each(fn form ->
-              if form.position < to_event.presentation_file.length do
-                Claper.Forms.create_form(%{
-                  title: form.title,
-                  position: form.position,
-                  enabled: form.enabled,
-                  fields:
-                    Enum.map(form.fields, fn field ->
-                      %{
-                        name: field.name,
-                        type: field.type
-                      }
-                    end),
-                  presentation_file_id: to_event.presentation_file.id
-                })
-              end
-            end)}
-         end)
+          {:ok,
+           from_event.presentation_file.forms
+           |> Enum.each(fn form ->
+             if form.position < to_event.presentation_file.length do
+               Claper.Forms.create_form(%{
+                 title: form.title,
+                 position: form.position,
+                 enabled: form.enabled,
+                 fields:
+                   Enum.map(form.fields, fn field ->
+                     %{
+                       name: field.name,
+                       type: field.type
+                     }
+                   end),
+                 presentation_file_id: to_event.presentation_file.id
+               })
+             end
+           end)}
+        end)         
+        |> Ecto.Multi.run(:openends, fn _repo, %{from_event: from_event, to_event: to_event} ->
+          {:ok,
+           from_event.presentation_file.openends
+           |> Enum.each(fn openend ->
+             if openend.position < to_event.presentation_file.length do
+               Claper.Openends.create_openend(%{
+                 title: openend.title,
+                 position: openend.position,
+                 enabled: openend.enabled,
+                 fields:
+                   Enum.map(openend.fields, fn field ->
+                     %{
+                       name: field.name,
+                       type: field.type
+                     }
+                   end),
+                 presentation_file_id: to_event.presentation_file.id
+               })
+             end
+           end)}
+        end)
          |> Ecto.Multi.run(:embeds, fn _repo, %{from_event: from_event, to_event: to_event} ->
            {:ok,
             from_event.presentation_file.embeds
@@ -385,6 +406,7 @@ defmodule Claper.Events do
               presentation_file: [
                 polls: [:poll_opts],
                 forms: [],
+                openends: [],
                 embeds: [],
                 presentation_state: []
               ]
@@ -473,6 +495,26 @@ defmodule Claper.Events do
 
               {:ok, new_form} = Claper.Forms.create_form(form_attrs)
               new_form
+            end)}
+         end)
+         |> Ecto.Multi.run(:openends, fn _repo,
+                                      %{
+                                        new_presentation_file: new_presentation_file,
+                                        original_event: original_event
+                                      } ->
+           {:ok,
+            Enum.map(original_event.presentation_file.openends, fn openend ->
+              openend_attrs =
+                Map.from_struct(openend)
+                |> Map.drop([:id, :inserted_at, :updated_at])
+                |> Map.put(:presentation_file_id, new_presentation_file.id)
+                |> Map.put(
+                  :fields,
+                  Enum.map(openend.fields, &Map.from_struct(&1))
+                )
+
+              {:ok, new_openend} = Claper.Openends.create_openend(openend_attrs)
+              new_openend
             end)}
          end)
          |> Ecto.Multi.run(:embeds, fn _repo,

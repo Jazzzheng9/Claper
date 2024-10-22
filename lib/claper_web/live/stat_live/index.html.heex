@@ -254,6 +254,50 @@
           <% end %>
         <% end %>
 
+        <% openends = Enum.filter(@event.presentation_file.openends, fn o -> o.position == position end) %>
+
+        <%= for openend <- openends do %>
+          <span class="text-xl font-semibold text-gray-900 mb-4">
+            <%= gettext("Openend") %>: <%= openend.title %>
+          </span>
+
+          <%= if length(openend.openend_submits) > 0 do %>
+            <%= link to: ~p"/export/#{openend.id}", class: "text-xs text-white bg-primary-500 rounded-md px-2 py-0.5", method: :post do %>
+              <%= gettext("Export all submissions") %>
+            <% end %>
+          <% end %>
+
+          <%= if length(openend.openend_submits) == 0 do %>
+            <p class="italic text-gray-500"><%= gettext("No openend submission has been sent") %></p>
+          <% end %>
+
+          <%= for os <- openend.openend_submits do %>
+            <div id={"#{os.id}-openend"}>
+              <div class="px-4 pb-2 pt-3 rounded-b-lg rounded-tr-lg bg-white relative shadow-md text-black break-all mt-4">
+                <div class="flex space-x-3 items-center">
+                  <%= if os.attendee_identifier do %>
+                    <img
+                      class="h-8 w-8"
+                      src={"https://api.dicebear.com/7.x/personas/svg?seed=#{os.attendee_identifier}.svg"}
+                    />
+                  <% else %>
+                    <img
+                      class="h-8 w-8"
+                      src={"https://api.dicebear.com/7.x/personas/svg?seed=#{os.user_id}.svg"}
+                    />
+                  <% end %>
+
+                  <div>
+                    <%= for res <- os.response do %>
+                      <p><strong><%= elem(res, 0) %>:</strong> <%= elem(res, 1) %></p>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+
         <%= for embed <- Enum.filter(@event.presentation_file.embeds , fn e -> e.position == position end) do %>
           <span class="text-xl font-semibold text-gray-900 mb-4">
             <%= gettext("Web content") %>: <%= embed.title %>

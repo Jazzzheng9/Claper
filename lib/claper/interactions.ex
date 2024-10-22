@@ -1,13 +1,14 @@
 defmodule Claper.Interactions do
   alias Claper.Polls
   alias Claper.Forms
+  alias Claper.Openends
   alias Claper.Embeds
   alias Claper.Events
   alias Claper.Presentations
 
   import Ecto.Query, warn: false
 
-  @type interaction :: Polls.Poll | Forms.Form | Embeds.Embed
+  @type interaction :: Polls.Poll | Forms.Form | Openends.Openend | Embeds.Embed
 
   def get_number_total_interactions(presentation_file_id) do
     from(p in Polls.Poll,
@@ -17,6 +18,13 @@ defmodule Claper.Interactions do
     |> Claper.Repo.one()
     |> Kernel.+(
       from(f in Forms.Form,
+        where: f.presentation_file_id == ^presentation_file_id,
+        select: count(f.id)
+      )
+      |> Claper.Repo.one()
+    )
+    |> Kernel.+(
+      from(f in Openends.Openend,
         where: f.presentation_file_id == ^presentation_file_id,
         select: count(f.id)
       )
@@ -45,10 +53,11 @@ defmodule Claper.Interactions do
         broadcast \\ false
       ) do
     with polls <- Polls.list_polls_at_position(presentation_file_id, position),
-         forms <- Forms.list_forms_at_position(presentation_file_id, position),
-         embeds <- Embeds.list_embeds_at_position(presentation_file_id, position) do
+        forms <- Forms.list_forms_at_position(presentation_file_id, position),
+        openends <- Openends.list_openends_at_position(presentation_file_id, position),
+        embeds <- Embeds.list_embeds_at_position(presentation_file_id, position) do
       interactions =
-        (polls ++ forms ++ embeds)
+        (polls ++ forms ++ openends ++ embeds)
         |> Enum.sort_by(& &1.inserted_at, {:asc, NaiveDateTime})
 
       if broadcast do
@@ -74,6 +83,10 @@ defmodule Claper.Interactions do
     |> Ecto.Multi.run(:disable_forms, fn _repo, _ ->
       {count, _} = Forms.disable_all(interaction.presentation_file_id, interaction.position)
       {:ok, count}
+    end)    
+    |> Ecto.Multi.run(:disable_openends, fn _repo, _ ->
+      {count, _} = Openends.disable_all(interaction.presentation_file_id, interaction.position)
+      {:ok, count}
     end)
     |> Ecto.Multi.run(:disable_embeds, fn _repo, _ ->
       {count, _} = Embeds.disable_all(interaction.presentation_file_id, interaction.position)
@@ -97,6 +110,10 @@ defmodule Claper.Interactions do
     Forms.set_enabled(interaction.id)
   end
 
+  defp set_enabled(%Openends.Openend{} = interaction) do
+    Openends.set_enabled(interaction.id)
+  end
+
   defp set_enabled(%Embeds.Embed{} = interaction) do
     Embeds.set_enabled(interaction.id)
   end
@@ -107,6 +124,10 @@ defmodule Claper.Interactions do
 
   def disable_interaction(%Forms.Form{} = interaction) do
     Forms.set_disabled(interaction.id)
+  end
+
+  def disable_interaction(%Openends.Openend{} = interaction) do
+    Openends.set_disabled(interaction.id)
   end
 
   def disable_interaction(%Embeds.Embed{} = interaction) do
