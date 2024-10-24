@@ -41,52 +41,8 @@
             required="true"
           />
         </div>
-        <%= if i.index >= 1 do %>
-          <button
-            type="button"
-            phx-click="remove_field"
-            phx-value-field={i.index}
-            phx-target={@myself}
-            class="rounded-md bg-red-500 hover:bg-red-600 transition block mt-6"
-          >
-            <svg
-              class="text-white h-8 transform rotate-45"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
-        <% end %>
       </div>
     <% end %>
-
-    <button
-      type="button"
-      phx-click="add_field"
-      phx-target={@myself}
-      class="rounded-md bg-primary-500 hover:bg-primary-600 transition block mt-3 mb-8"
-    >
-      <svg
-        class="text-white h-10"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-          clip-rule="evenodd"
-        />
-      </svg>
-    </button>
 
     <div class="flex space-x-3">
       <button

@@ -19,6 +19,31 @@
       />
     </div>
 
+    <%= inputs_for f, :fields, fn i -> %>
+      <div class="flex gap-x-3 mt-3 items-center justify-start">
+        <div class="flex items-center gap-x-2">
+          <ClaperWeb.Component.Input.text
+            form={i}
+            labelClass={if @dark, do: "text-white"}
+            fieldClass={if @dark, do: "bg-gray-700 text-white"}
+            key={:name}
+            name={ngettext("Field %{count}", "Field %{count}", i.index + 1)}
+            autofocus="true"
+            required="true"
+          />
+          <ClaperWeb.Component.Input.select
+            form={i}
+            labelClass={if @dark, do: "text-white"}
+            array={[{:"#{gettext("Text")}", "text"}, {:"#{gettext("Email")}", "email"}]}
+            fieldClass={if @dark, do: "bg-gray-700 text-white"}
+            key={:type}
+            name={gettext("Type")}
+            required="true"
+          />
+        </div>
+      </div>
+    <% end %>
+
     <div class="flex space-x-3">
       <button
         type="submit"
