@@ -260,10 +260,10 @@ defmodule Claper.Forms do
 
   """
   def get_form_submit(user_id, form_id) when is_number(user_id),
-    do: Repo.get_by(FormSubmit, form_id: form_id, user_id: user_id)
+    do: Repo.get_by(FormSubmit, form_id: form_id, user_id: user_id) 
 
   def get_form_submit(attendee_identifier, form_id),
-    do: Repo.get_by(FormSubmit, form_id: form_id, attendee_identifier: attendee_identifier)
+    do: Repo.get_by(FormSubmit, form_id: form_id, attendee_identifier: attendee_identifier) 
 
   @doc """
   Gets a single FormSubmit by its ID.

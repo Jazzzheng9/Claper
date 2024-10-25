@@ -1,6 +1,20 @@
 defmodule ClaperWeb.EventLive.FormComponent do
   use ClaperWeb, :live_component
 
+
+  @impl true
+  def update(assigns, socket) do
+    # Check if form_submits exists in assigns, else default to an empty list
+    form_submits = Map.get(assigns, :form_submits, [])
+    form_submit_count = length(form_submits)
+
+    {:ok,
+     socket
+     |> assign(assigns)  # Assigns the passed data
+     |> assign(:form_submit_count, form_submit_count)
+     |> assign(:form_submits, form_submits)}  # Assign form_submits or empty list
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -33,6 +47,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
           </div>
         </div>
       </div>
+  
       <div id="extended-form" class="bg-black w-full py-3 px-6 text-black shadow-lg rounded-md">
         <div class="block w-full h-full cursor-pointer" phx-click={toggle_form()} phx-target={@myself}>
           <div id="form-pane" class="float-right mt-2">
@@ -47,11 +62,11 @@ defmodule ClaperWeb.EventLive.FormComponent do
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-
+  
           <p class="text-xs text-gray-500 my-1"><%= gettext("Current form") %></p>
           <p class="text-white text-lg font-semibold mb-4"><%= @form.title %></p>
         </div>
-
+  
         <%= form_for :form_submit, "#", [id: @id, phx_change: "validate", phx_target: @myself, phx_submit: "submit"], fn f -> %>
           <div class="flex flex-col space-y-3">
             <%= if (length @form.fields) > 0 do %>
@@ -75,7 +90,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
               <% end %>
             <% end %>
           </div>
-
+  
           <div class="flex items-center gap-4">
             <button
               type="submit"
@@ -83,7 +98,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
             >
               <%= if is_nil(assigns.current_form_submit), do: gettext("Submit"), else: gettext("Edit") %>
             </button>
-
+  
             <%= unless is_nil(assigns.current_form_submit) do %>
               <div class="flex gap-1 text-green-500 text-sm">
                 <svg
@@ -100,23 +115,75 @@ defmodule ClaperWeb.EventLive.FormComponent do
                 </svg>
                 <span><%= gettext("Saved") %></span>
               </div>
-
+  
               <div class="mt-4 text-white">
                 <h3 class="text-lg font-bold"><%= gettext("Submitted Content") %>:</h3>
-                <ul class="list-disc list-inside">
-                  <%= for {field_name, field_value} <- assigns.current_form_submit.response do %>
-                    <li><strong><%= field_name %>:</strong> <%= field_value %></li>  
-                  <% end %> 
-                </ul>
+                <div
+                  id="form-list"
+                  class="overflow-y-auto max-h-full pb-5 px-3"
+                  phx-update="replace"  
+                  data-forms-nb={@form_submit_count}
+                  phx-hook="ScrollIntoDiv"
+                >
+                  <div :for={{id, submission} <- @form_submits} id={id}> 
+                    <div class="px-4 pb-2 pt-3 rounded-b-lg rounded-tr-lg bg-white relative shadow-md text-black break-all mt-2">
+                      <div class="float-right mr-1">
+                        <span class="text-red-500">
+                          <%= link(gettext("Delete"),
+                            to: "#",
+                            phx_click: "delete-form-submit",
+                            phx_value_id: submission.id,
+                            phx_value_event_id: @event.uuid,
+                            data: [confirm: gettext("This cannot be undone, confirm ?")]
+                          ) %>
+                        </span>
+                      </div>
+
+                      <p>
+                        <span class="font-semibold text-lg">
+                          <%= gettext("Form") %>
+                        </span>: <%= submission.form.title %>
+                      </p>
+
+                      <div class="flex space-x-3 items-center">
+                        <%= if submission.attendee_identifier do %>
+                          <img
+                            class="h-8 w-8"
+                            src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}"}
+                          />
+                        <% else %>
+                          <img
+                            class="h-8 w-8"
+                            src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.user_id}"}
+                          />
+                        <% end %>
+
+                        <div>
+                          <%= for res <- submission.response do %>
+                            <p>
+                              <strong>
+                                <%= elem(res, 0) %>:
+                              </strong>
+                              <%= elem(res, 1) %>
+                            </p>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p>Form Submit Count: <%= @form_submit_count %></p>
               </div>
             <% end %>
           </div>
         <% end %>
-
       </div>
     </div>
     """
   end
+  
+
+
 
   @impl true
   def handle_event("validate", %{"form_submit" => form_submit_params}, socket) do
@@ -141,10 +208,6 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
-        event_id = socket.assigns.event.uuid
-        list_form = Claper.Forms.list_forms(event_id)
-
-        # Append the new form_submit to the list of existing form_submits
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}
@@ -169,10 +232,6 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
-        event_id = socket.assigns.event.uuid
-        list_form = Claper.Forms.list_forms(event_id)
-
-        # Append the new form_submit to the list of existing form_submits
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}
@@ -220,4 +279,5 @@ defmodule ClaperWeb.EventLive.FormComponent do
   end
 end
 
-# the version of last unsuccessful test.
+
+

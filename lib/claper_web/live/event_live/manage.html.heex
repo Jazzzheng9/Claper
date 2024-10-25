@@ -307,6 +307,8 @@
               live_action={@create_action}
               position={@state.position}
               return_to={~p"/e/#{@event.code}/manage"}
+              form_submits: @form_submits
+              event={@event}
             />
           </div>
         <% end %>

@@ -685,11 +685,6 @@ defmodule ClaperWeb.EventLive.Show do
     socket |> assign(:current_form_submit, fs)
   end
 
-  defp get_all_form_submit(socket, interaction) do
-    fss = Forms.list_form_submits(interaction.presentation_file_id)
-    socket |> assign(:current_form_submissions, fss)
-  end
-
   defp get_current_openend_submit(%{assigns: %{current_user: current_user}} = socket, openend_id)
        when is_map(current_user) do
     os = Openends.get_openend_submit(current_user.id, openend_id)
