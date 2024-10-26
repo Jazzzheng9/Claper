@@ -73,6 +73,10 @@ defmodule ClaperWeb.EventLive.Show do
 
     posts = list_posts(socket, event.uuid)
 
+    form_submits = list_form_submits(socket, event.presentation_file.id)
+
+    current_path = URI.parse(socket.host_uri).path
+
     socket =
       socket
       |> assign(:attendees_nb, 1)
@@ -86,13 +90,16 @@ defmodule ClaperWeb.EventLive.Show do
       |> assign(:state, event.presentation_file.presentation_state)
       |> assign(:nickname, "")
       |> stream(:posts, posts)
+      |> stream(:form_submits, form_submits)
       |> assign(:post_count, Enum.count(posts))
       |> starting_soon_assigns(event)
       |> get_current_interaction(event, event.presentation_file.presentation_state.position)
       |> check_leader(event)
       |> leader_list(event)
-
-    {:ok, socket}
+      |> assign(:form_submit_count, length(form_submits))
+      |> assign(show_content: false)
+      |> assign(:current_path, current_path)
+      {:ok, socket}
   end
 
   defp leader_list(socket, event) do
@@ -343,6 +350,12 @@ defmodule ClaperWeb.EventLive.Show do
   end
 
   @impl true
+  def handle_info(:refresh_live_view, socket) do
+    # Redirect to the same path to trigger a page reload
+    {:noreply, push_redirect(socket, to: socket.assigns.current_path)}
+  end
+
+  @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -584,6 +597,11 @@ defmodule ClaperWeb.EventLive.Show do
     end
   end
 
+  @impl true
+  def handle_event("toggle-content", _value, socket) do
+    {:noreply, assign(socket, :show_content, !socket.assigns.show_content)}
+  end
+
   def toggle_side_menu(js \\ %JS{}) do
     js
     |> JS.toggle(
@@ -659,6 +677,10 @@ defmodule ClaperWeb.EventLive.Show do
   defp list_posts(_socket, event_id) do
     Posts.list_posts(event_id, [:event, :reactions, :user])
   end
+
+  defp list_form_submits(_socket, presentation_file_id) do
+    Claper.Forms.list_form_submits(presentation_file_id, [:form])
+  end  
 
   defp get_current_vote(%{assigns: %{current_user: current_user}} = socket, poll_id)
        when is_map(current_user) do
@@ -745,4 +767,6 @@ defmodule ClaperWeb.EventLive.Show do
   defp load_current_interaction(socket, interaction) do
     socket |> assign(:current_interaction, interaction)
   end
+
+
 end

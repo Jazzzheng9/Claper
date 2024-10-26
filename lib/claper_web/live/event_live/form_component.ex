@@ -208,6 +208,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
+        send(self().parent, :refresh_live_view)
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}
@@ -232,6 +233,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
+        send(self().parent, :refresh_live_view)
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}
@@ -254,6 +256,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", form.id)
          ) do
       {:ok, form_submit} ->
+        send(self().parent, :refresh_live_view)
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}

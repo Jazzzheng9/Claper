@@ -162,6 +162,67 @@
       </div>
     <% end %>
 
+    <div class="mt-4 text-white">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-bold"><%= gettext("Submitted Content") %>:</h3>
+        <button phx-click="toggle-content" class="px-4 py-2 bg-blue-500 text-white rounded">
+          Toggle Content
+        </button>
+      </div>
+    
+      <%= case @current_interaction do %>
+       <% %Claper.Forms.Form{} -> %>
+
+          <div
+            id="form-list"
+            class="overflow-y-auto max-h-full pb-5 px-3 mt-2" 
+            phx-update="stream"
+            data-forms-nb={@form_submit_count}
+            phx-hook="ScrollIntoDiv"
+          >
+            <div :for={{id, submission} <- @streams.form_submits} id={id}>
+
+              <%= if Map.get(submission.form || %{}, :title) == Map.get(@current_interaction || %{}, :title) do %>                  <div class="flex space-x-3 items-center">
+                <div class="px-4 pb-2 pt-3 rounded-b-lg rounded-tr-lg bg-white relative shadow-md text-black break-all mt-2">
+        
+                <p>
+                  <span class="font-semibold text-lg">
+                    <%= gettext("Form") %>
+                  </span>: <%= submission.form.title %>
+                </p>
+                
+                    <%= if submission.attendee_identifier do %>
+                      <img
+                        class="h-8 w-8"
+                        src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}"}
+                      />
+                    <% else %>
+                      <img
+                        class="h-8 w-8"
+                        src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.user_id}"}
+                      />
+                    <% end %>
+          
+                    <div>
+                      <%= for res <- submission.response do %>
+                        <p>
+                          <%= elem(res, 1) %>
+                        </p>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+      <% end %>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+    </div>
+    
     <div
       id="reacts"
       phx-hook="GlobalReacts"
