@@ -356,12 +356,12 @@ defmodule ClaperWeb.EventLive.Show do
     {:noreply,
      socket
      |> stream_insert(:form_submits, fs)
-     |> push_event("scroll", %{})}
+     |> push_event("Scroll", %{})}
   end
 
   @impl true
   def handle_info({:form_submit_updated, fs}, socket) do
-    {:noreply, socket |> stream_insert(:form_submits, fs) |> push_event("scroll_to_bottom", %{})}
+    {:noreply, socket |> stream_insert(:form_submits, fs) |> push_event("Scroll", %{})}
   end
 
   @impl true
