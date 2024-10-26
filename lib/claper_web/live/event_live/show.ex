@@ -246,6 +246,13 @@ defmodule ClaperWeb.EventLive.Show do
         socket
       ) do
     {:noreply, socket |> load_current_interaction(interaction)}
+    send(self().parent, :refresh_live_view)
+  end
+
+  @impl true
+  def handle_info(:refresh_live_view, socket) do
+    # Redirect to the same path to trigger a page reload
+    {:noreply, push_redirect(socket, to: socket.assigns.current_path)}
   end
 
   @impl true
@@ -354,7 +361,7 @@ defmodule ClaperWeb.EventLive.Show do
 
   @impl true
   def handle_info({:form_submit_updated, fs}, socket) do
-    {:noreply, socket |> stream_insert(:form_submits, fs)}
+    {:noreply, socket |> stream_insert(:form_submits, fs) |> push_event("scroll", %{})}
   end
 
   @impl true
@@ -761,17 +768,15 @@ defmodule ClaperWeb.EventLive.Show do
 
   defp load_current_interaction(socket, %Forms.Form{} = interaction) do
     socket 
-    |> assign(:current_interaction, interaction) |> get_current_form_submit(interaction.id)
+    |> assign(:current_interaction, interaction) |> get_current_form_submit(interaction.id) 
   end
 
   defp load_current_interaction(socket, %Openends.Openend{} = interaction) do
     socket 
-    |> assign(:current_interaction, interaction) |> get_current_openend_submit(interaction.id)
+    |> assign(:current_interaction, interaction) |> get_current_openend_submit(interaction.id) 
   end
 
   defp load_current_interaction(socket, interaction) do
     socket |> assign(:current_interaction, interaction)
   end
-
-
 end
