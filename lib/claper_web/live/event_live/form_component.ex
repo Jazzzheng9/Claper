@@ -43,7 +43,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
               <path d="M17 12h.01"></path>
               <path d="M13 12h.01"></path>
             </svg>
-            <span class="font-bold"><%= gettext("See current form") %></span>
+            <span class="font-bold"><%= gettext("See current question") %></span>
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
             </svg>
           </div>
   
-          <p class="text-xs text-gray-500 my-1"><%= gettext("Current form") %></p>
+          <p class="text-xs text-gray-500 my-1"><%= gettext("Current question") %></p>
           <p class="text-white text-lg font-semibold mb-4"><%= @form.title %></p>
         </div>
   
@@ -83,7 +83,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
                       value={
                         if is_nil(assigns.current_form_submit),
                           do: ~c"",
-                          else: assigns.current_form_submit.response[""]
+                          else: assigns.current_form_submit.response[field.name]
                       }
                     />
                 <% end %>
@@ -115,65 +115,7 @@ defmodule ClaperWeb.EventLive.FormComponent do
                 </svg>
                 <span><%= gettext("Saved") %></span>
               </div>
-  
-              <div class="mt-4 text-white">
-                <h3 class="text-lg font-bold"><%= gettext("Submitted Content") %>:</h3>
-                <div
-                  id="form-list"
-                  class="overflow-y-auto max-h-full pb-5 px-3"
-                  phx-update="replace"  
-                  data-forms-nb={@form_submit_count}
-                  phx-hook="ScrollIntoDiv"
-                >
-                  <div :for={{id, submission} <- @form_submits} id={id}> 
-                    <div class="px-4 pb-2 pt-3 rounded-b-lg rounded-tr-lg bg-white relative shadow-md text-black break-all mt-2">
-                      <div class="float-right mr-1">
-                        <span class="text-red-500">
-                          <%= link(gettext("Delete"),
-                            to: "#",
-                            phx_click: "delete-form-submit",
-                            phx_value_id: submission.id,
-                            phx_value_event_id: @event.uuid,
-                            data: [confirm: gettext("This cannot be undone, confirm ?")]
-                          ) %>
-                        </span>
-                      </div>
 
-                      <p>
-                        <span class="font-semibold text-lg">
-                          <%= gettext("Form") %>
-                        </span>: <%= submission.form.title %>
-                      </p>
-
-                      <div class="flex space-x-3 items-center">
-                        <%= if submission.attendee_identifier do %>
-                          <img
-                            class="h-8 w-8"
-                            src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}"}
-                          />
-                        <% else %>
-                          <img
-                            class="h-8 w-8"
-                            src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.user_id}"}
-                          />
-                        <% end %>
-
-                        <div>
-                          <%= for res <- submission.response do %>
-                            <p>
-                              <strong>
-                                <%= elem(res, 0) %>:
-                              </strong>
-                              <%= elem(res, 1) %>
-                            </p>
-                          <% end %>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p>Form Submit Count: <%= @form_submit_count %></p>
-              </div>
             <% end %>
           </div>
         <% end %>

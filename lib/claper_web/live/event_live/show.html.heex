@@ -165,53 +165,54 @@
     <div class="w-full lg:w-1/3 lg:mx-auto">
       <div class="pl-4">
         <h3 class="text-lg font-bold"><%= gettext("Submitted Content") %>:</h3>
-    
-        <%= case @current_interaction do %>
-          <% %Claper.Forms.Form{} -> %>
-            <div
-              id="form-list"
-              class="w-full"
-              phx-update="stream"
-              data-forms-nb={@form_submit_count}
-              phx-hook="ScrollIntoDiv"
-            >
-              <div :for={{id, submission} <- @streams.form_submits} id={id}>
-                <%= if Map.get(submission.form || %{}, :title) == Map.get(@current_interaction || %{}, :title) do %>
-                  <div class="w-full">
-                    <div class="bg-white rounded-lg shadow-md text-black break-all w-full">
-                      <p class="ml-4">
-                        <span class="font-semibold text-lg">
-                          <%= gettext("Form") %>
-                        </span>: <%= submission.form.title %>
-                      </p>
-        
-                      <div class="flex space-x-3 items-center mt-2">
-                        <%= if submission.attendee_identifier do %>
-                          <img
-                            class="h-8 w-8"
-                            src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}"}
-                          />
-                        <% else %>
-                          <img
-                            class="h-8 w-8"
-                            src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.user_id}"}
-                          />
-                        <% end %>
-        
-                        <div>
-                          <%= for res <- submission.response do %>
-                            <p><%= elem(res, 1) %></p>
-                          <% end %>                        
+        <%= if @current_interaction do %>
+          <%= case @current_interaction do %>
+            <% %Claper.Forms.Form{} -> %>
+              <div
+                id="form-list"
+                class="w-full"
+                phx-update="stream"
+                data-forms-nb={@form_submit_count}
+                phx-hook="ScrollIntoDiv"
+              >
+                <div :for={{id, submission} <- @streams.form_submits} id={id}>
+                  <%= if Map.get(submission.form || %{}, :title) == Map.get(@current_interaction || %{}, :title) do %>
+                    <div class="w-full">
+                      <div class="bg-white rounded-lg shadow-md text-black break-all w-full">
+                        <p class="ml-4">
+                          <span class="font-semibold text-lg">
+                            <%= gettext("Question") %>
+                          </span>: <%= submission.form.title %>
+                        </p>
+          
+                        <div class="flex space-x-3 items-center mt-2">
+                          <%= if submission.attendee_identifier do %>
+                            <img
+                              class="h-8 w-8"
+                              src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.attendee_identifier}"}
+                            />
+                          <% else %>
+                            <img
+                              class="h-8 w-8"
+                              src={"https://api.dicebear.com/7.x/personas/svg?seed=#{submission.user_id}"}
+                            />
+                          <% end %>
+          
+                          <div>
+                            <%= for res <- submission.response do %>
+                              <p><%= elem(res, 1) %></p>
+                            <% end %>                        
+                          </div>
                         </div>
                       </div>
+                      <br>
                     </div>
-                    <br>
-                  </div>
-                <% end %>
+                  <% end %>
+                </div>
               </div>
-            </div>
+          <% end %>
         <% end %>      
-    </div>
+      </div>
       <br>
       <br>
       <br>
