@@ -78,12 +78,12 @@ defmodule ClaperWeb.EventLive.FormComponent do
                       labelClass="text-white"
                       fieldClass="bg-gray-700 text-white"
                       key={String.to_atom(field.name)}
-                      name={field.name}
+                      name={""}
                       required="true"
                       value={
                         if is_nil(assigns.current_form_submit),
                           do: ~c"",
-                          else: assigns.current_form_submit.response[field.name]
+                          else: assigns.current_form_submit.response[""]
                       }
                     />
                 <% end %>
@@ -208,7 +208,6 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
-        send(self().parent, :refresh_live_view)
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}
@@ -233,7 +232,6 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", socket.assigns.form.id)
          ) do
       {:ok, form_submit} ->
-        send(self().parent, :refresh_live_view)
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}
@@ -256,7 +254,6 @@ defmodule ClaperWeb.EventLive.FormComponent do
            |> Map.put("form_id", form.id)
          ) do
       {:ok, form_submit} ->
-        send(self().parent, :refresh_live_view)
         {:noreply,
           socket
           |> assign(:current_form_submit, form_submit)}

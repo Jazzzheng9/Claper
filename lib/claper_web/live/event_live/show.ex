@@ -345,14 +345,23 @@ defmodule ClaperWeb.EventLive.Show do
   end
 
   @impl true
-  def handle_info(_, socket) do
-    {:noreply, socket}
+  def handle_info({:form_submit_created, fs}, socket) do
+    {:noreply,
+     socket
+     |> stream_insert(:form_submits, fs)
+     |> push_event("scroll", %{})}
   end
 
   @impl true
-  def handle_info(:refresh_live_view, socket) do
-    # Redirect to the same path to trigger a page reload
-    {:noreply, push_redirect(socket, to: socket.assigns.current_path)}
+  def handle_info({:form_submit_updated, fs}, socket) do
+    {:noreply, socket |> stream_insert(:form_submits, fs)}
+  end
+
+  @impl true
+  def handle_info({:form_submit_deleted, fs}, socket) do
+    {:noreply,
+     socket
+     |> stream_delete(:form_submits, fs)}
   end
 
   @impl true
@@ -597,10 +606,6 @@ defmodule ClaperWeb.EventLive.Show do
     end
   end
 
-  @impl true
-  def handle_event("toggle-content", _value, socket) do
-    {:noreply, assign(socket, :show_content, !socket.assigns.show_content)}
-  end
 
   def toggle_side_menu(js \\ %JS{}) do
     js
